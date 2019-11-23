@@ -1,0 +1,182 @@
+---
+title: "Derivadas Matriciais - Modelo Reduzido"
+author: "Leonardo Uchoa"
+header-includes:
+- \usepackage[brazil]{babel}
+- \usepackage{graphicx}
+- \usepackage{amsmath,amssymb}
+output:
+    pdf_document
+---
+
+# Conteúdo do documento
+Aqui estão as derivadas matricias para que se obtenha o gradiente da log-verossimilhança do modelo em questão.
+
+# Formulação
+
+Primeiramente é importante dizer que o modelo proposto é o que segue a seguinte função de covariância
+
+\begin{equation}
+\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}( \textbf{h} ) & C_{12}( \textbf{h} ) \\
+  C_{21}( \textbf{h} ) & C_{22}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+onde $\boldsymbol\theta = (\boldsymbol\sigma,\textbf{a},\boldsymbol\nu,\mu)$. Neste momento restringe-se ao modelo reduzido (parsimonioso) e portanto
+
+\begin{equation*}
+\begin{aligned}
+C_{11}( \textbf{h} ) {} &= \sigma_1 M( \textbf{h} | a,\nu_1)  \\
+C_{22}( \textbf{h} ) {} &= \sigma_2 M( \textbf{h} | a,\nu_2)  \\
+C_{12}( \textbf{h} ) {} &= \rho_{12} \sigma_1 \sigma_2 M( \textbf{h} | a, (\nu_1 + \nu_1)/ 2) \\
+M(\textbf{h} | \nu ,a) &= \frac{2^{1-\nu} (a d)^{\nu} K_{\nu}(a d)}{\Gamma(\nu)} 
+\end{aligned}
+\end{equation*}
+
+onde $d = ||\textbf{h}||$.Assim, ao assumirmos que o modelo é $vec(Y) \sim N(0,\boldsymbol\Sigma)$, temos que a log-verossimilhança será
+
+\begin{equation}
+l(\boldsymbol\theta) = -1/2  \big( log( |\boldsymbol\Sigma_{\boldsymbol\theta}| )  +
+\textbf{x}^{t} \boldsymbol\Sigma_{\boldsymbol\theta}  \textbf{x}\big)
+\label{eq:log_like}
+\end{equation}
+
+# Derivadas
+
+## Fórmula Geral da Derivada da Log-verossimilhança
+
+Ao derivarmos \ref{eq:log_like} em relação a qualquer elemento, $\theta$, de $\boldsymbol\theta$, temos a expressão geral da derivada da log-verossimilhança:
+
+\begin{equation}
+\frac{ \partial l(\boldsymbol\theta) }{ \partial \theta} =
+tr \Big( \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+        \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+              {\partial \theta}
+    \Big) -
+\textbf{x}^{t} 
+  \Bigg[ 
+    \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+    \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+    {\partial \theta}
+    \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+    \Bigg]
+\textbf{x}.
+\label{eq:log_like_deriv_geral}
+\end{equation}
+
+Então se $y = \textbf{x} \boldsymbol\Sigma^{-1}_{\boldsymbol\theta}$, pela simetria da função de covariância Wittle-Matern (suposta no artigo de Gneiting & Kleiber), tem-se que
+
+\begin{equation}
+\frac{ \partial l(\boldsymbol\theta) }{ \partial \theta} =
+tr \Big( \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+        \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+              {\partial \theta}
+    \Big) -
+\textbf{y}^{t} 
+  \Bigg[ 
+    \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+    {\partial \theta}
+    \Bigg]
+\textbf{y}.
+\label{eq:log_like_deriv_geral}
+\end{equation}
+
+
+## Derivada das Funções de Covariâncias
+
+Para obter $\partial \boldsymbol\Sigma_{\boldsymbol\theta}/ \partial \theta$, onde $\boldsymbol\theta=(\sigma^2_1,\sigma^2_2,a,\rho,\mu,\nu_1,\nu_2)$ (pois estamos no caso reduzido), vamos continuar a regra da cadeia passo a passo.
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a  $\sigma^2_1$
+
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+      {\partial \sigma^2_1}= 
+\begin{pmatrix}
+  M(\textbf{h} | \nu_1,a) & \\
+  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge0}
+
+\end{pmatrix}
+\end{equation}
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a  $\sigma^2_2$
+
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+      {\partial \sigma^2_2}= 
+\begin{pmatrix}
+  \textbf{\huge0} & \\
+  \frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & M(\textbf{h} | \nu_2,a)
+
+\end{pmatrix}
+\end{equation}
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a  $\rho$
+
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+      {\partial \sigma^2_2}= 
+\begin{pmatrix}
+  \textbf{\huge0} & \\
+  \sigma_1 \sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge0}
+
+\end{pmatrix}
+\end{equation}
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a a
+
+Neste caso temos
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+     {\partial a} =
+\begin{pmatrix}
+  \sigma^2_1 \psi_1 & \rho \sigma^2_1\sigma^2_2 \psi_{3} \\
+  \rho \sigma^2_1\sigma^2_2 \psi_{3} & \sigma^2_2 \psi_{2}
+\end{pmatrix}
+\end{equation}
+
+em que $\psi_{k}$ é a derivada de $\partial M(\textbf{h} | \nu_k ,a)$ c.r.a $a$ para $k = 1,2,3$, onde  $\nu_3 = (\nu_1 + \nu_1)/ 2)$. Em seguida, temos que
+
+\begin{equation}
+\frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
+\frac{2^{1-\nu}d^{\nu}}{\Gamma(\nu)} 
+  \Bigg[
+    \nu a^{\nu -1} K_{\nu}(ad) + a^{\nu} \frac{\partial K_{\nu}(ad)}{\partial a}
+  \Bigg]
+\end{equation}
+
+e, como 
+
+\begin{equation}
+\frac{\partial K_{\nu}(ad)}{\partial a} = 
+d \Bigg[ 
+    \frac{\nu}{ad} K_{\nu}(ad) - K_{\nu + 1 }(ad)
+  \Bigg] 
+\end{equation}
+
+então
+
+\begin{equation}
+\frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
+\frac{2^{1-\nu}d^{\nu}}{\Gamma(\nu)} 
+  \Bigg[
+    \nu a^{\nu -1} K_{\nu}(ad) + 
+    a^{\nu}d \Bigg(
+              \frac{\nu}{ad} K_{\nu}(ad) - K_{\nu + 1 }(ad)
+              \Bigg)
+  \Bigg].
+\end{equation}
+
+Ao simplificar a última equação, obtem-se
+
+\begin{equation}
+\frac{2^{1-\nu}d^{\nu}a^{\nu -1}}{\Gamma(\nu)}
+  \Bigg[
+    2\nu K_{\nu}(ad) - ad K_{\nu + 1 }(ad)
+  \Bigg]
+\end{equation}
