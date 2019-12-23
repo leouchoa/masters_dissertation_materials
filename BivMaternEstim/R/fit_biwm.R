@@ -10,7 +10,7 @@
 #'   \item{theta}{TODO}
 #'   \item{se.mu}{TODO}
 #'   \item{se.theta}{TODO}
-#'   \item{AIC}{TODO}
+#'   \item{likelihood}{TODO}
 #'
 #' @export
 #'
@@ -18,15 +18,51 @@
 #' set.seed(1)
 #' n <- 40
 #' coords <- matrix(runif(2*n), ncol = 2)
+#' temp <- rnorm(2*n)
+#' S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = c(0.5, 0.5), coords_matrix = coords)
+#' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
+#'
+#' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5))
+#' generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5))
 fit_biwm <- function(obs_vec,
                      coords_matrix,
                      theta0,
-                     nus){
+                     nus, ...){
+
+  if(length(nus) != 2){
+    stop("Smoothness parameter vector must be of length 2", call. = FALSE)
+  }
+
+  if(length(theta0) != 4){
+    stop("All shape paramaters must be the same", call. = FALSE)
+  }
+
+  if(abs(theta0[4]) > sqrt(nus[1]*nus[2])/mean(nus)){
+    stop("Rho inserted does not define a valid covariance matrix", call. = FALSE)
+  }
+
+  # Average smoothness for third entry
+  nus[3] <- mean(nus[1:2])
 
   mu <- colMeans(obs_vec) # maximum profile-likelihood, initial value
 
+  # LLike_biwm(theta0, nus = nus,  mu = mu, coords_matrix = coords_matrix, obs_vec = obs_vec)
+  # LLike_biwm_reduced_grad(theta0, nus = nus,  mu = mu, coords_matrix = coords_matrix, obs_vec = obs_vec)
+  mle <- optim(theta0, fn = LLike_biwm,
+               method = "L-BFGS-B",
+               gr = LLike_biwm_reduced_grad,
+               lower = c(0.001, 0.001, 0.001, -min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
+               upper = c(Inf, Inf, Inf, min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
+               control = list(fnscale = -1, trace = 5),
+               nus = nus,  mu = mu, # We always use Z = vec(\mathbf{Y} - boldsymbol\mu), maybe center it outside function?
+               coords_matrix = coords_matrix,
+               obs_vec = obs_vec)
+
+  # Update mu with generalized least squares, maybe update mle
+
   ret <- list(mu = mu,
-              theta = theta)
+              theta = mle$par,
+              likelihood = mle$value)
 
   class(ret) <- "biwm"
 
