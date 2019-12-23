@@ -4,11 +4,27 @@
 \alias{LLike_biwm}
 \title{Log-likelihood of the Bivariate (Wittle-)Matern Model.}
 \usage{
-LLike_biwm(theta, nus, mu, coords_matrix, obs_vec, parsimonious = TRUE, ...)
+LLike_biwm(theta, nus, mu, coords_matrix, obs_vec, ...)
+}
+\arguments{
+\item{theta}{A 4 x 1 numeric vector, the order of parameters is: theta = c(sigma_1^2, sigma_2^2, a, rho).}
+
+\item{nus}{A 2 x 1 numeric vector with the smoothness coefficients for the Mat\'{e}rn covariance function, c(nu1, nu2).}
+
+\item{mu}{A 2 x 1 numeric vector of means c(mu1, mu2).}
+
+\item{coords_matrix}{A n x 2 numeric matrix of coordinates for the data.}
+
+\item{obs_vec}{A n x 2 numeric matrix of data. We assume that the user has already log-transformed the data.}
 }
 \value{
 log-likelihood
 }
 \description{
 Log-likelihood of the Bivariate (Wittle-)Matern Model.
+}
+\examples{
+set.seed(1)
+n <- 40
+coords <- matrix(runif(2*n), ncol = 2)
 }

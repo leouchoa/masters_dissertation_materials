@@ -1,89 +1,59 @@
 #' Log-likelihood of the Bivariate (Wittle-)Matern Model.
-#' @param starting_values
+#'
+#' @param theta A 4 x 1 numeric vector, the order of parameters is: theta = c(sigma_1^2, sigma_2^2, a, rho).
+#' @param nus A 2 x 1 numeric vector with the smoothness coefficients for the Mat\'{e}rn covariance function, c(nu1, nu2).
+#' @param mu A 2 x 1 numeric vector of means c(mu1, mu2).
+#' @param coords_matrix A n x 2 numeric matrix of coordinates for the data.
+#' @param obs_vec A n x 2 numeric matrix of data. We assume that the user has already log-transformed the data.
 #'
 #' @return log-likelihood
 #'
 #' @export
 #'
-#' @example
+#' @examples
 #' set.seed(1)
 #' n <- 40
 #' coords <- matrix(runif(2*n), ncol = 2)
-
-#the order of params is: sigmas; as; rho; mu; nus
-
 LLike_biwm <- function(theta,
                        nus,
                        mu,
                        coords_matrix,
-                       obs_vec,
-                       parsimonious = TRUE,
-                       ...){
+                       obs_vec){
 
-  other_params <- list(...)
+  sigmas <- theta[1:2]
+  as <- theta[3]
+  rho <- theta[4]
 
-  if(parsimonious == TRUE){
-
-    sigmas <- theta[1:2]
-    as <- theta[3]
-    rho <- theta[4]
-    # mu <- theta[5]
-    # nus <- theta[6:7]
-
-    if(length(nus) != 2){
-      stop("Smoothness parameter vector must be of length 2",
-           call. = FALSE)
-    }
-
-    if(length(unique(as)) != 1){
-      stop("All shape paramaters must be the same",
-           call. = FALSE)
-    }
-
-    if(
-      abs(rho) > ( sqrt(nus[1]*nus[2]) )/mean(nus)
-    ){
-      stop("Rho inserted does not define a valid covariance matrix",
-           call. = FALSE)
-    }
-
-    #lazy (noob) preproc
-    nus[3] <- mean(nus[1:2])
-    if(length(as) == 1){
-      as <- rep(as,3)
-    }
-
-    autocov_matrix <- sigma_assembler_biwm(sigmas = sigmas,
-                                           as = as,
-                                           rho = rho,
-                                           nus = nus,
-                                           coords_matrix = coords_matrix)
-
+  if(length(nus) != 2){
+    stop("Smoothness parameter vector must be of length 2", call. = FALSE)
   }
 
-  else{
-
-    sigmas <- theta[1:2]
-    as <- theta[3:5]
-    rho <- theta[6]
-    # mu <- theta[7]
-    # nus <- theta[8:10]
-
-    autocov_matrix <- sigma_assembler_biwm(sigmas = sigmas,
-                                           as = as,
-                                           rho = rho,
-                                           nus = nus,
-                                           coords_matrix = coords_matrix)
+  if(length(unique(as)) != 1){
+    stop("All shape paramaters must be the same", call. = FALSE)
   }
 
-  # print(sigmas,as,rho)
+  if(abs(rho) > sqrt(nus[1]*nus[2])/mean(nus)){
+    stop("Rho inserted does not define a valid covariance matrix", call. = FALSE)
+  }
+
+  # Average smoothness for third entry
+  nus[3] <- mean(nus[1:2])
+
+  if(length(as) == 1){
+    as <- rep(as, 3)
+  }
+
+  autocov_matrix <- sigma_assembler_biwm(sigmas = sigmas,
+                                         as = as,
+                                         rho = rho,
+                                         nus = nus,
+                                         coords_matrix = coords_matrix)
 
   as.double(
     -1/2 *
       (
-        log( det(autocov_matrix) ) +
-          t( (obs_vec - mu) ) %*%
-          solve(autocov_matrix, obs_vec - mu) +
+        determinant(autocov_matrix, logarithm = TRUE) +
+          crossprod(obs_vec - mu, solve(autocov_matrix, obs_vec - mu)) +
           length(obs_vec) * log(2*pi)
       )
   )
