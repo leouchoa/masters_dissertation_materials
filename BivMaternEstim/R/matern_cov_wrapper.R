@@ -1,11 +1,11 @@
 # Matern covariance wraper for coordinate matrices
-matern_cov_wrapper <- function(coords_matrix, a, nu){
+#
+# Future work: generalize to cov_wrapper instead of matern_cov, see fields options.
+matern_cov_wrapper <- function(coords_dist, a, nu){
 
-  matrix(
-    fields::Matern(d = as.vector(as.matrix(dist(coords_matrix))),
+  as.matrix(
+    fields::Matern(d = coords_matrix,
                    alpha = a,
-                   nu = nu),
-    ncol = nrow(coords_matrix),
-    nrow = nrow(coords_matrix)
+                   nu = nu)
   )
 }

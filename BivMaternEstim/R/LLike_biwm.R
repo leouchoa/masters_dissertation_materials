@@ -9,11 +9,6 @@
 #' @return log-likelihood
 #'
 #' @export
-#'
-#' @examples
-#' set.seed(1)
-#' n <- 40
-#' coords <- matrix(runif(2*n), ncol = 2)
 LLike_biwm <- function(theta,
                        nus,
                        mu,
