@@ -1,9 +1,14 @@
 #' Log-likelihood of the Bivariate (Wittle-)Matern Model.
 #' @param starting_values
+#'
 #' @return log-likelihood
+#'
 #' @export
-
-source("R/sigma_assembler_biwm.R")
+#'
+#' @example
+#' set.seed(1)
+#' n <- 40
+#' coords <- matrix(runif(2*n), ncol = 2)
 
 #the order of params is: sigmas; as; rho; mu; nus
 

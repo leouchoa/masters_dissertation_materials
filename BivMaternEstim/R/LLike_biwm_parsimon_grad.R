@@ -1,6 +1,3 @@
-source("R/sigma_assembler_biwm.R")
-
-
 ####### -------  Assembling(organization purposes) function-------------
 
 matrices_assembler <- function(M_1,M_2,M_12){
