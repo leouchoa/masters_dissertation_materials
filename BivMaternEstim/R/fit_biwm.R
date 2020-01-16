@@ -15,7 +15,7 @@
 #' @export
 #'
 #' @examples
-#' set.seed(1)
+#' set.seed(3)
 #' n <- 40
 #' coords <- matrix(runif(2*n), ncol = 2)
 #' temp <- rnorm(2*n)
@@ -27,7 +27,7 @@
 fit_biwm <- function(obs_vec,
                      coords_matrix,
                      theta0,
-                     nus, ...){
+                     nus, verbosity = 0, ...){
 
   if(length(nus) != 2){
     stop("Smoothness parameter vector must be of length 2", call. = FALSE)
@@ -48,12 +48,13 @@ fit_biwm <- function(obs_vec,
 
   # LLike_biwm(theta0, nus = nus,  mu = mu, coords_matrix = coords_matrix, obs_vec = obs_vec)
   # LLike_biwm_reduced_grad(theta0, nus = nus,  mu = mu, coords_matrix = coords_matrix, obs_vec = obs_vec)
-  mle <- optim(theta0, fn = LLike_biwm,
-               method = "L-BFGS-B",
+  mle <- optim(theta0,
+               fn = LLike_biwm,
                gr = LLike_biwm_reduced_grad,
+               method = "L-BFGS-B",
                lower = c(0.001, 0.001, 0.001, -min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
                upper = c(Inf, Inf, Inf, min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
-               control = list(fnscale = -1, trace = 5),
+               control = list(fnscale = -1, trace = verbosity),
                nus = nus,  mu = mu, # We always use Z = vec(\mathbf{Y} - boldsymbol\mu), maybe center it outside function?
                coords_matrix = coords_matrix,
                obs_vec = obs_vec)

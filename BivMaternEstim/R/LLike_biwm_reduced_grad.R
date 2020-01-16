@@ -36,7 +36,7 @@ LLike_biwm_reduced_grad <- function(theta,
 
   ##### Sigmas matrices
 
-  sigmas_grad_matrices <- vector("list",2)
+  sigmas_grad_matrices <- vector("list", 2)
 
   sigmas_grad_matrices[[1]] <-  matrices_assembler(
     M_1 = matern_cov_wrapper(d,
@@ -103,7 +103,7 @@ LLike_biwm_reduced_grad <- function(theta,
                                    obs_vec = Z)
 
   sigmas[2] <- general_LLike_deriv(cov_matrix = autocov_matrix,
-                                   grad_matrix = sigmas_grad_matrices[[1]],
+                                   grad_matrix = sigmas_grad_matrices[[2]],
                                    obs_vec = Z)
 
   rho <- general_LLike_deriv(cov_matrix = autocov_matrix,
