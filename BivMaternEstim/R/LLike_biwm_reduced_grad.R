@@ -83,37 +83,36 @@ LLike_biwm_reduced_grad <- function(theta,
 
   as_grad_matrix <- matrices_assembler(
 
-    M_1 = sigmas[1] * matern_deriv(a = as[1],
-                                   nu = nus[1],
-                                   coords_matrix = coords_matrix),
+    M_1 = sigmas[1] * matern_deriv(coords_matrix = coords_matrix,
+                                   a = as[1],
+                                   nu = nus[1]),
 
-    M_2 = sigmas[2] * matern_deriv(a = as[2],
-                                   nu = nus[2],
-                                   coords_matrix = coords_matrix),
+    M_2 = sigmas[2] * matern_deriv(coords_matrix = coords_matrix,
+                                   a = as[2],
+                                   nu = nus[2]),
 
-    M_12 = rho * sqrt(sigmas[1] * sigmas[2]) * matern_deriv(a = as[3],
-                                                            nu = nus[3],
-                                                            coords_matrix = coords_matrix)
+    M_12 = rho * sqrt(sigmas[1] * sigmas[2]) * matern_deriv(coords_matrix = coords_matrix,
+                                                            a = as[3],
+                                                            nu = nus[3])
   )
 
   ###### ------ Eval of Gradients -----
 
-  sigmas[1] <- general_LLike_deriv(cov_matrix = autocov_matrix,
+  Dsigmas[1] <- general_LLike_deriv(cov_matrix = autocov_matrix,
                                    grad_matrix = sigmas_grad_matrices[[1]],
                                    obs_vec = Z)
 
-  sigmas[2] <- general_LLike_deriv(cov_matrix = autocov_matrix,
+  Dsigmas[2] <- general_LLike_deriv(cov_matrix = autocov_matrix,
                                    grad_matrix = sigmas_grad_matrices[[2]],
                                    obs_vec = Z)
 
-  rho <- general_LLike_deriv(cov_matrix = autocov_matrix,
+  Das <- general_LLike_deriv(cov_matrix = autocov_matrix,
+                             grad_matrix = as_grad_matrix,
+                             obs_vec = Z)
+
+  Drho <- general_LLike_deriv(cov_matrix = autocov_matrix,
                              grad_matrix = rho_grad_matrix,
                              obs_vec = Z)
 
-  as <- general_LLike_deriv(cov_matrix = autocov_matrix,
-                            grad_matrix = as_grad_matrix,
-                            obs_vec = Z)
-
-
-  return(c(sigmas, a = as, rho = rho))
+  return(c(Dsigmas, a = Das, rho = Drho))
 }
