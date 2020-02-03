@@ -73,8 +73,8 @@ LLike_biwm_reduced_grad <- function(theta,
     M_2 = zero_matrix,
 
     M_12 = sqrt(sigmas[1] * sigmas[2]) * matern_cov_wrapper(d,
-                                                            a = as[1],
-                                                            nu = nus[1])
+                                                            a = as[3],
+                                                            nu = nus[3])
 
   )
 

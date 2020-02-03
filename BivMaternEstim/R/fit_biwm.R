@@ -24,6 +24,7 @@
 #'
 #' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5))
 #' generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5))
+#'
 fit_biwm <- function(obs_vec,
                      coords_matrix,
                      theta0,
