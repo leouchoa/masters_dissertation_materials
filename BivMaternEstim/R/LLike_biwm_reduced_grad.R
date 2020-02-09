@@ -98,6 +98,8 @@ LLike_biwm_reduced_grad <- function(theta,
 
   ###### ------ Eval of Gradients -----
 
+  Dsigmas <- rep(0,2)
+
   Dsigmas[1] <- general_LLike_deriv(cov_matrix = autocov_matrix,
                                    grad_matrix = sigmas_grad_matrices[[1]],
                                    obs_vec = Z)
@@ -114,5 +116,5 @@ LLike_biwm_reduced_grad <- function(theta,
                              grad_matrix = rho_grad_matrix,
                              obs_vec = Z)
 
-  return(c(Dsigmas, a = Das, rho = Drho))
+  return(c(grad_sigmas = Dsigmas, grad_a = Das, grad_rho = Drho))
 }

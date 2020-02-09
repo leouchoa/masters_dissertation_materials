@@ -3,6 +3,8 @@ sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix){
 
   d <- dist(coords_matrix)
 
+  if(length(a) == 1) a <- rep(a,3)#i know.... i know.... just so example works
+
   # Maybe remove since check is done elsewhere
   if(length(nus) == 2) nus[3] <- mean(nus[1:2])
 
