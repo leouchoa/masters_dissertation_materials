@@ -15,7 +15,7 @@
 #' @export
 #'
 #' @examples
-#' set.seed(3)
+#' set.seed(1)
 #' n <- 40
 #' coords <- matrix(runif(2*n), ncol = 2)
 #' temp <- rnorm(2*n)
@@ -23,8 +23,9 @@
 #' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #'
 #' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5))
+#' informed_test
 #' generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5))
-#'
+#' generic_test
 fit_biwm <- function(obs_vec,
                      coords_matrix,
                      theta0,

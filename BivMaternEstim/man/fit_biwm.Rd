@@ -4,7 +4,7 @@
 \alias{fit_biwm}
 \title{Log-likelihood of the Bivariate (Wittle-)Matern Model.}
 \usage{
-fit_biwm(obs_vec, coords_matrix, theta0, nus, ...)
+fit_biwm(obs_vec, coords_matrix, theta0, nus, verbosity = 0, ...)
 }
 \arguments{
 \item{obs_vec}{A n x 2 numeric matrix of data. We assume that the user has already log-transformed the data.}
@@ -27,12 +27,14 @@ fit_biwm(obs_vec, coords_matrix, theta0, nus, ...)
 Log-likelihood of the Bivariate (Wittle-)Matern Model.
 }
 \examples{
-set.seed(1)
+set.seed(3)
 n <- 40
 coords <- matrix(runif(2*n), ncol = 2)
 temp <- rnorm(2*n)
 S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = c(0.5, 0.5), coords_matrix = coords)
 log_cd <- matrix(temp\%*\%chol(S) + rep(c(1,2), each = n), ncol = 2)
 
+informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5))
 generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5))
+
 }

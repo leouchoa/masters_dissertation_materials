@@ -3,7 +3,7 @@ sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix){
 
   d <- dist(coords_matrix)
 
-  if(length(a) == 1) a <- rep(a,3)#i know.... i know.... just so example works
+  if(length(a) == 1) a <- rep(a, 3)
 
   # Maybe remove since check is done elsewhere
   if(length(nus) == 2) nus[3] <- mean(nus[1:2])
@@ -17,8 +17,8 @@ sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix){
                                         nu = nus[2])
 
   M_12 <- rho * sqrt(sigmas[1] * sigmas[2]) * matern_cov_wrapper(d,
-                                                           a = a[3],
-                                                           nu = nus[3])
+                                                                 a = a[3],
+                                                                 nu = nus[3])
 
   ret <- matrices_assembler(M_1, M_2, M_12)
 

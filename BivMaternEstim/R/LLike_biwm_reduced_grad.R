@@ -117,4 +117,5 @@ LLike_biwm_reduced_grad <- function(theta,
                              obs_vec = Z)
 
   return(c(grad_sigmas = Dsigmas, grad_a = Das, grad_rho = Drho))
+
 }

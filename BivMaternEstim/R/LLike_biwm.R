@@ -29,6 +29,8 @@ LLike_biwm <- function(theta,
                                          nus = nus,
                                          coords_matrix = coords_matrix)
 
+
+  # Maybe replace this by mvtnorm?
   Z <- as.numeric(t(apply(obs_vec, 1, function(x) x - mu)))
 
   as.double(
