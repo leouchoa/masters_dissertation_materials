@@ -1,0 +1,289 @@
+---
+title: "Block Properties for Biwm"
+author: "Leonardo Uchoa"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Todas as contas a seguir tem o intuito de melhorar problemas de instabilidade numérica, reduzir o custo computacional de inversas e simplesmente fazer este belíssimo código funcionar.
+
+# Contas na Log-Verossimilhança
+## Log do Determinante
+
+Se 
+
+\begin{equation}
+\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}( \textbf{h} ) & C_{12}( \textbf{h} ) \\
+  C_{21}( \textbf{h} ) & C_{22}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+Então 
+
+\begin{equation}
+det(\Sigma) = | \Sigma | =
+  \Bigg|
+      C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})
+  \Bigg| * \Bigg| C_{22}(\textbf{h}) \Bigg|
+\end{equation}
+
+Portanto, com o logarítmo fica
+
+\begin{equation}
+\label{eq:log_det}
+log(det(\Sigma)) = 
+  log\Bigg|
+      C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})
+  \Bigg| + 
+  log\Bigg| C_{22}(\textbf{h}) \Bigg|
+\end{equation}
+
+## Inversa
+
+Aqui existem duas formas. Eu preferi usar a que irei apresentação a seguir pois ela encaixa bem com o resultado (\ref{eq:log_det}) do log do determinante\footnote{Apesar de eu achar que não tem como o alimentar o optim com as inversas obtidas, para ganhar tempo}.
+
+Se 
+
+\begin{equation}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+Então 
+
+\begin{equation}
+\label{eq_sistem:block_inv}
+\begin{aligned}
+C_{11}^{*}( \textbf{h} ) &= %C_{11}
+\Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1} \\
+C_{12}^{*}( \textbf{h} ) &= - %C_{12}
+\Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1}C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})  \\
+C_{21}^{*}( \textbf{h} ) &= -  %C_{21}
+C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h}) \Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1}  \\
+C_{22}^{*}( \textbf{h} ) &= C_{22}^{-1}(\textbf{h}) + %C_{22}
+C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h}) \Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1}C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})  \\
+\end{aligned}
+\end{equation}
+
+Já que\footnote{No artigo $\Sigma$ é definida assim} $C_{12}(\textbf{h}) = C_{21}(\textbf{h})$, se definirmos
+
+\begin{equation}
+\begin{aligned}
+V_1 &:= C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h}) \\
+V_2 &:= C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})
+\end{aligned}
+\end{equation}
+
+podemos obter uma forma simplificada para o sistema (\ref{eq_sistem:block_inv}), já que como $C_{11},C_{12},C_{21},C_{22}$ são simétricas
+
+\begin{equation}
+\begin{aligned}
+C_{11}^{*}( \textbf{h} ) &= V_2^{-1} \\
+C_{12}^{*}( \textbf{h} ) &= -V_2^{-1}V_1^{T} \\
+C_{21}^{*}( \textbf{h} ) &= -V_1V_2^{-1} \\
+C_{22}^{*}( \textbf{h} ) &=  C_{22}( \textbf{h} ) -V_1V_2^{-1}V_1^{T}
+\end{aligned}
+\end{equation}
+
+pois $V_1 = C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})$ fornece $V_1^{T} = C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})$. 
+
+Note ainda que $C_{12}^{*}( \textbf{h} ) = C_{12}^{*T}( \textbf{h} )$.
+
+\textbf{\underline{Prova:}}
+
+Primeiramente
+
+\begin{equation}
+\begin{aligned}
+V_2^{T} &= C_{11}(\textbf{h}) - (C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{12}(\textbf{h}))^{T} \\
+&=C_{11}(\textbf{h}) -
+C_{12}(\textbf{h})(C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h}))^{T} \\
+&=C_{11}(\textbf{h}) - 
+C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{12}(\textbf{h}) 
+\\
+&= V_2
+\end{aligned}
+\end{equation}
+
+Agora
+
+\begin{equation}
+\begin{aligned}
+C_{12}^{*T}( \textbf{h} ) &= -(V_2^{-1}V_1^{T})^{T} \\
+&= V_1^{T}(V_2^{-1})^{T} \\
+&= V_1^{T}(V_2^{-1}) \\
+&= C_{21}^{*}( \textbf{h} )
+\end{aligned}
+\end{equation}
+
+
+# Contas no Gradiente
+
+Aqui a idéia é mitigar o custo computacional de $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \boldsymbol\theta_{k}}\Bigg)$ já que vão aparecer muitas matrizes nulas bem grandes em $\partial\Sigma / \partial \boldsymbol\theta_{k}$
+
+## Relembrar é viver: Produto de Matrizes
+
+Se 
+
+\begin{equation}
+\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}( \textbf{h} ) & C_{12}( \textbf{h} ) \\
+  C_{21}( \textbf{h} ) & C_{22}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+e 
+
+\begin{equation}
+\boldsymbol M  =
+\begin{pmatrix}
+  A & B \\
+  C & D
+\end{pmatrix}
+\end{equation}
+
+Então desde as matrizes $\boldsymbol M$ e $\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})$ sejam conformes
+
+\begin{equation}
+\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h}) \boldsymbol M =
+\begin{pmatrix}
+  C_{11}( \textbf{h} )A + C_{12}( \textbf{h} )C &
+  C_{11}( \textbf{h} )B + C_{12}( \textbf{h} )D\\
+  C_{21}( \textbf{h} )A + C_{22}( \textbf{h} )C &
+  C_{21}( \textbf{h} )B + C_{22}( \textbf{h} )D\\
+\end{pmatrix}
+\end{equation}
+
+## Traços: $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \theta_{k}}\Bigg)$
+
+### Caso em que $\theta_{k} = \sigma^2_1$
+
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  M(\textbf{h} | \nu_1,a) & \\
+  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
+\end{pmatrix} \\
+&= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
+  C_{21}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) \\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= 
+tr\Bigg( 
+C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
+\Bigg) +
+2 tr\Bigg( 
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+\Bigg) \\
+&= tr\Bigg( 
+C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
+\Bigg) +
+\frac{\rho \sigma_2}{\sigma_1} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+\Bigg)
+\end{aligned}
+\end{equation}
+
+### Caso em que $\theta_{k} = \sigma^2_2$
+
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  \textbf{\huge o } & \\
+  \frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & M(\textbf{h} | \nu_2,a)
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{12}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+  C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= 
+tr\Bigg( 
+C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
+\Bigg) +
+2 tr\Bigg( 
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+\Bigg) \\
+&= tr\Bigg( 
+C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
+\Bigg) +
+\frac{\rho \sigma_2}{\sigma_1} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+\Bigg)
+\end{aligned}
+\end{equation}
+
+### Caso em que $\theta_{k} = \rho$
+
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  \textbf{\huge o } & \\
+  \sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+  C_{12}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{11}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
+  C_{22}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{21}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= 
+2\sigma_1\sigma_2tr\Bigg( 
+ C_{22}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+\Bigg)
+\end{aligned}
+\end{equation}

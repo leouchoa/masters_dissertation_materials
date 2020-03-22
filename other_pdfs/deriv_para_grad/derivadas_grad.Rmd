@@ -96,7 +96,7 @@ Para obter $\partial \boldsymbol\Sigma_{\boldsymbol\theta}/ \partial \theta$, on
       {\partial \sigma^2_1}= 
 \begin{pmatrix}
   M(\textbf{h} | \nu_1,a) & \\
-  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge0}
+  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
 
 \end{pmatrix}
 \end{equation}
@@ -108,7 +108,7 @@ Para obter $\partial \boldsymbol\Sigma_{\boldsymbol\theta}/ \partial \theta$, on
 \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
       {\partial \sigma^2_2}= 
 \begin{pmatrix}
-  \textbf{\huge0} & \\
+  \textbf{\huge o } & \\
   \frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & M(\textbf{h} | \nu_2,a)
 
 \end{pmatrix}
@@ -121,8 +121,8 @@ Para obter $\partial \boldsymbol\Sigma_{\boldsymbol\theta}/ \partial \theta$, on
 \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
       {\partial \sigma^2_2}= 
 \begin{pmatrix}
-  \textbf{\huge0} & \\
-  \sigma_1 \sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge0}
+  \textbf{\huge o } & \\
+  \sigma_1 \sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
 
 \end{pmatrix}
 \end{equation}
