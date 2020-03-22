@@ -1,0 +1,113 @@
+---
+title: "Log. Det. Exploration"
+author: "Leonardo Uchoa"
+date: "3/22/2020"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Context
+
+- The problem was that for many scenarios the algorithm failed at the very first iteration.
+
+- Exploration of the log-likelihood for those cases showed that the issue was $log|\Sigma| = \infty$
+
+- Further exploration showed that this was aggravated along with sample size
+
+## Idea
+
+- Calculate $log|\Sigma|$ for many scenarios of $\sigma^2_1,\sigma^2_2,a,\rho$ where the initial step is true value itself.
+
+- Do this calculation with increasing sample size 2~3 times with different seeds, in case we're missing numerical problems.
+
+- Save the output to disk for "good" practice 
+
+## In R
+
+>- Create a grid matrix with values for $\sigma^2_1,\sigma^2_2,a,\rho$
+
+>- Create a vector of increasing sample sizes 
+
+>- For any number of seeds (replication) loop over the grid and sample size vector with the `fit_biwm` code for estimation.\footnote{That implies the 3 for loops}
+
+>- Hope your advisor doesn't call you dumb
+
+## Results - Old Code
+
+```{r}
+arqs_new <- dir("../mle_scripts/block_matrix/autocov_test_new/autocovs_dets/",full.names = TRUE)
+
+sum_isInf_matrix_new <- matrix(0,length(arqs_new),3)
+
+for(i in seq_along(arqs_new)){
+  
+  load(arqs_new[i])
+  
+  sum_isInf_matrix_new[i,1] <- as.integer(
+    stringr::str_extract(arqs_new[i],"\\d+"))
+  
+  sum_isInf_matrix_new[i,2:ncol(sum_isInf_matrix_new)] <- colSums(apply(
+    do.call(cbind,det_out_list),2,is.infinite))
+  
+}
+
+sum_isInf_matrix_new <- as.data.frame(sum_isInf_matrix_new)
+sum_isInf_matrix_new <- sum_isInf_matrix_new[order(sum_isInf_matrix_new$V1),]
+
+colnames(sum_isInf_matrix_new) <- c("Sample_size","1st_seed","2nd_seed")
+
+# kableExtra::kable_styling(knitr::kable(sum_isInf_matrix_new,),
+#                           font_size = 7)
+
+arqs_old <- dir("../mle_scripts/block_matrix/autocov_test_old/autocovs_dets/",full.names = TRUE)
+
+sum_isInf_matrix_old <- matrix(0,length(arqs_old),4)
+
+for(i in seq_along(arqs_old)[-1]){
+  
+  load(arqs_old[i])
+  
+  sum_isInf_matrix_old[i,1] <- as.integer(
+    stringr::str_extract(arqs_old[i],"\\d+"))
+  
+  sum_isInf_matrix_old[i,2:4] <- colSums(apply(
+    log(do.call(cbind,det_out_list)),2,is.infinite))
+  
+}
+
+sum_isInf_matrix_old <- as.data.frame(sum_isInf_matrix_old)
+sum_isInf_matrix_old <- sum_isInf_matrix_old[order(sum_isInf_matrix_old$V1),]
+
+pct_sum_isInf_matrix_old <- round(cbind(sum_isInf_matrix_old[,1],
+      apply(sum_isInf_matrix_old[,2:4],2,function(x){x / 8000 * 100})),2)
+
+colnames(sum_isInf_matrix_old) <- c("Sample_size","1st_seed","2nd_seed","3rd_seed")
+
+kableExtra::kable_styling(
+  knitr::kable(pct_sum_isInf_matrix_old[2:16,],
+               caption = "Experimentation with Old Code. Pct out of 8000 grid values",row.names = FALSE),
+  font_size = 7)
+
+```
+
+## Results - Old Code
+
+```{r}
+kableExtra::kable_styling(
+  knitr::kable(pct_sum_isInf_matrix_old[16:32,],
+               caption = "Experimentation with Old Code. Pct out of 8000 grid values",row.names = FALSE),
+  font_size = 7)
+```
+
+## Results - Code With Block Matrix Implementations
+
+```{r}
+kableExtra::kable_styling(
+  knitr::kable(sum_isInf_matrix_new,
+               caption = "Experimentation with New Code. Pct out of 8000 grid values",row.names = FALSE),
+  font_size = 7)
+```
+
