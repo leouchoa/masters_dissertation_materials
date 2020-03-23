@@ -43,6 +43,21 @@ log(det(\Sigma)) =
   log\Bigg| C_{22}(\textbf{h}) \Bigg|
 \end{equation}
 
+### Extra
+
+Para o nosso caso também é válido que 
+
+$$
+det(\Sigma) = \Bigg| C_{11}(\textbf{h})C_{22}(\textbf{h}) -
+C_{12}(\textbf{h})C_{21}(\textbf{h})\Bigg|
+$$
+pois as matrizes $C_{12}(\textbf{h})$ e $C_{22}(\textbf{h})$ comutam. Além disso como $C_{12}(\textbf{h}) = C_{21}(\textbf{h})$
+
+$$
+det(\Sigma) = \Bigg| C_{11}(\textbf{h})C_{22}(\textbf{h}) -
+C^{2}_{12}(\textbf{h})\Bigg|
+$$
+
 ## Inversa
 
 Aqui existem duas formas. Eu preferi usar a que irei apresentação a seguir pois ela encaixa bem com o resultado (\ref{eq:log_det}) do log do determinante\footnote{Apesar de eu achar que não tem como o alimentar o optim com as inversas obtidas, para ganhar tempo}.
@@ -214,7 +229,7 @@ C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 
 \begin{equation}
 \begin{aligned}
-\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_2} &= 
 \begin{pmatrix}
   C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
   C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
@@ -225,10 +240,10 @@ C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \end{pmatrix}\\
 &= 
 \begin{pmatrix}
-  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{12}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
-  C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{12}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+  C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
 \end{pmatrix}
 \end{aligned}
 \end{equation}
@@ -237,17 +252,17 @@ Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
 
 \begin{equation}
 \begin{aligned}
-tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= 
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_2}\Bigg) &= 
 tr\Bigg( 
 C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
 \Bigg) +
 2 tr\Bigg( 
- C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
 \Bigg) \\
 &= tr\Bigg( 
 C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \Bigg) +
-\frac{\rho \sigma_2}{\sigma_1} tr\Bigg( 
+\frac{\rho \sigma_1}{\sigma_2} tr\Bigg( 
  C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
 \Bigg)
 \end{aligned}
@@ -258,7 +273,7 @@ C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 
 \begin{equation}
 \begin{aligned}
-\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \rho} &= 
 \begin{pmatrix}
   C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
   C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
@@ -281,7 +296,7 @@ Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
 
 \begin{equation}
 \begin{aligned}
-tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= 
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \rho}\Bigg) &= 
 2\sigma_1\sigma_2tr\Bigg( 
  C_{22}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
 \Bigg)
@@ -293,7 +308,7 @@ tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\S
 
 \begin{equation}
 \begin{aligned}
-\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a} &= 
 \begin{pmatrix}
   C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
   C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
@@ -318,7 +333,7 @@ Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
 
 \begin{equation}
 \begin{aligned}
-tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) = \text{ } 
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a}\Bigg) = \text{ } 
 & \sigma^2_1 tr\Bigg(C_{11}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_1,a) \Bigg) + \\
 & \sigma^2_2 tr\Bigg(C_{22}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_2,a) \Bigg) + \\
 & 2 \rho \sigma_2 \sigma_2 tr\Bigg(C_{12}^{*}(\textbf{h}) M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) \Bigg)
@@ -348,7 +363,7 @@ e desenvolvermos um pouco mais as contas, temos que
 
 \begin{equation}
 \begin{aligned}
-tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= \text{ } 
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a}\Bigg) &= \text{ } 
 \sigma^2_1 \phi_1 tr\Bigg(C_{11}^{*}(\textbf{h}) \Phi_1 \Bigg) + \\
 & \sigma^2_2 \phi_2 tr\Bigg(C_{22}^{*}(\textbf{h}) \Phi_2 \Bigg) + \\
 & 2 \rho \sigma_2 \sigma_2 \phi_3 tr\Bigg(C_{12}^{*}(\textbf{h}) \Phi_3 \Bigg) 
