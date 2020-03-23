@@ -287,3 +287,70 @@ tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\S
 \Bigg)
 \end{aligned}
 \end{equation}
+
+### Caso em que $\theta_{k} = a$
+
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  \sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) & 
+  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
+  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  \sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{12}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{11}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{12}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
+  C_{21}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{22}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{21}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{22}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) = \text{ } 
+& \sigma^2_1 tr\Bigg(C_{11}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_1,a) \Bigg) + \\
+& \sigma^2_2 tr\Bigg(C_{22}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_2,a) \Bigg) + \\
+& 2 \rho \sigma_2 \sigma_2 tr\Bigg(C_{12}^{*}(\textbf{h}) M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) \Bigg)
+\end{aligned}
+\end{equation}
+
+Por outro lado, temos que 
+
+\begin{equation}
+\frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
+\frac{(\frac{2}{a})^{1-\nu}d^{\nu}}{\Gamma(\nu)}
+  \Bigg[
+    2\nu K_{\nu}(ad) - ad K_{\nu + 1 }(ad)
+  \Bigg]
+\end{equation}
+
+Se chamarmos 
+
+\begin{equation}
+\begin{aligned}
+\phi_i &:= \frac{(\frac{2}{a})^{1-\nu_i}d^{\nu_i}}{\Gamma(\nu_i)} \\
+\Phi_i &= \Bigg[ 2\nu_i K_{\nu_i}(ad) - ad K_{\nu_i + 1 }(ad) \Bigg]
+\end{aligned}
+\end{equation}
+
+e desenvolvermos um pouco mais as contas, temos que
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= \text{ } 
+\sigma^2_1 \phi_1 tr\Bigg(C_{11}^{*}(\textbf{h}) \Phi_1 \Bigg) + \\
+& \sigma^2_2 \phi_2 tr\Bigg(C_{22}^{*}(\textbf{h}) \Phi_2 \Bigg) + \\
+& 2 \rho \sigma_2 \sigma_2 \phi_3 tr\Bigg(C_{12}^{*}(\textbf{h}) \Phi_3 \Bigg) 
+\end{aligned}
+\end{equation}
