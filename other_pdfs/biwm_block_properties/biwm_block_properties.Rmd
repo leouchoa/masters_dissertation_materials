@@ -104,7 +104,7 @@ podemos obter uma forma simplificada para o sistema (\ref{eq_sistem:block_inv}),
 C_{11}^{*}( \textbf{h} ) &= V_2^{-1} \\
 C_{12}^{*}( \textbf{h} ) &= -V_2^{-1}V_1^{T} \\
 C_{21}^{*}( \textbf{h} ) &= -V_1V_2^{-1} \\
-C_{22}^{*}( \textbf{h} ) &=  C_{22}( \textbf{h} ) -V_1V_2^{-1}V_1^{T}
+C_{22}^{*}( \textbf{h} ) &=  C_{22}^{-1}( \textbf{h} ) -V_1V_2^{-1}V_1^{T}
 \end{aligned}
 \end{equation}
 
@@ -138,6 +138,52 @@ C_{12}^{*T}( \textbf{h} ) &= -(V_2^{-1}V_1^{T})^{T} \\
 &= C_{21}^{*}( \textbf{h} )
 \end{aligned}
 \end{equation}
+
+## Avaliação de $\boldsymbol\Sigma^{-1}$ na log-verossimilhança
+
+Neste caso precisamos avaliar $y^{T}\boldsymbol\Sigma^{-1}y$. A estrutura de blocos também pode nos ajudar a deixar o algorítmo um pouco mais estável e rápido.
+
+Novamente a inversa de $\boldsymbol\Sigma$ é denotada por
+
+\begin{equation}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+Agora se $y^{T} = (y_1,y_2)^{T}$, em que $y_1$ e $y_2$ são, respectivamente, os vetores resposta associados às primeira e segunda variáveis multivariadas, temos que 
+
+\begin{equation}
+\label{eq:inv_log_like}
+\begin{aligned}
+y^{T}\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h})y &=
+y^{T}\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}y \\
+&=(y_1,y_2)^{T}\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}\begin{pmatrix}y_1 \\ y_2\end{pmatrix} \\
+&= (y_1,y_2)^{T}\begin{pmatrix}
+C_{11}^{*}( \textbf{h} )y_1 + C_{12}^{*}( \textbf{h} )y_2 \\
+  C_{21}^{*}( \textbf{h} )y_1 + C_{22}^{*}( \textbf{h} )y_2
+\end{pmatrix} \\
+&= y_1^{T}C_{11}^{*}( \textbf{h} )y_1 + y_1^{T}C_{12}^{*}( \textbf{h} )y_2 + y_2^{T}C_{21}^{*}( \textbf{h} )y_1 + y_2^{T}C_{22}^{*}( \textbf{h} )y_2 \\
+&= y_1^{T}C_{11}^{*}( \textbf{h} )y_1 + 2y_1^{T}C_{12}^{*}( \textbf{h} )y_2 + y_2^{T}C_{22}^{*}( \textbf{h} )y_2
+\end{aligned}
+\end{equation}
+
+pois como $C_{12}^{*T}( \textbf{h} ) = C_{21}^{*}( \textbf{h} )$ obtemos que 
+
+$$y_1^{T}C_{12}^{*}( \textbf{h} )y_2 = tr(y_1^{T}C_{12}^{*}( \textbf{h} )y_2) = tr(y_1^{T}C_{12}^{*}( \textbf{h} )y_2)^{T} = tr((C_{12}^{*}( \textbf{h} )y_2)^{T}y_1) =  tr(y_2^{T}C_{12}^{*T}( \textbf{h} )y_1) = y_2^{T}C_{21}^{*}( \textbf{h} )y_1$$
+Também é possível escrever o resultado anterior em termos de (\ref{eq:inv_log_like}), o que fornece
+
+$$
+y_1^{T}V_2^{-1}y_1 - 2y_1^{T}V_2^{-1}V_1^{T}y_2 + y_2^{T}C_{22}^{-1}y_2 - y_2^{T}V_1V_2^{-1}V_1^{T}y_2
+$$
 
 
 # Contas no Gradiente
@@ -343,19 +389,19 @@ tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\S
 Por outro lado, temos que 
 
 \begin{equation}
-\frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
+M^{'}(\textbf{h}|\nu,a) = \frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
 \frac{(\frac{2}{a})^{1-\nu}d^{\nu}}{\Gamma(\nu)}
   \Bigg[
     2\nu K_{\nu}(ad) - ad K_{\nu + 1 }(ad)
   \Bigg]
 \end{equation}
 
-Se chamarmos 
+Se definirmos
 
 \begin{equation}
 \begin{aligned}
 \phi_i &:= \frac{(\frac{2}{a})^{1-\nu_i}d^{\nu_i}}{\Gamma(\nu_i)} \\
-\Phi_i &= \Bigg[ 2\nu_i K_{\nu_i}(ad) - ad K_{\nu_i + 1 }(ad) \Bigg]
+\Phi_i &:= \Bigg[ 2\nu_i K_{\nu_i}(ad) - ad K_{\nu_i + 1 }(ad) \Bigg]
 \end{aligned}
 \end{equation}
 
@@ -366,6 +412,6 @@ e desenvolvermos um pouco mais as contas, temos que
 tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a}\Bigg) &= \text{ } 
 \sigma^2_1 \phi_1 tr\Bigg(C_{11}^{*}(\textbf{h}) \Phi_1 \Bigg) + \\
 & \sigma^2_2 \phi_2 tr\Bigg(C_{22}^{*}(\textbf{h}) \Phi_2 \Bigg) + \\
-& 2 \rho \sigma_2 \sigma_2 \phi_3 tr\Bigg(C_{12}^{*}(\textbf{h}) \Phi_3 \Bigg) 
+& 2 \rho \sigma_1 \sigma_2 \phi_3 tr\Bigg(C_{12}^{*}(\textbf{h}) \Phi_3 \Bigg) 
 \end{aligned}
 \end{equation}
