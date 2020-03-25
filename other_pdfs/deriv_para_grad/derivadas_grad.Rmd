@@ -39,7 +39,7 @@ onde $d = ||\textbf{h}||$.Assim, ao assumirmos que o modelo é $vec(Y) \sim N(0,
 
 \begin{equation}
 l(\boldsymbol\theta) = -1/2  \big( log( |\boldsymbol\Sigma_{\boldsymbol\theta}| )  +
-\textbf{x}^{t} \boldsymbol\Sigma_{\boldsymbol\theta}  \textbf{x}\big)
+\textbf{x}^{t} \boldsymbol\Sigma^{-1}_{\boldsymbol\theta}  \textbf{x}\big)
 \label{eq:log_like}
 \end{equation}
 

@@ -60,7 +60,7 @@ $$
 
 ## Inversa
 
-Aqui existem duas formas. Eu preferi usar a que irei apresentação a seguir pois ela encaixa bem com o resultado (\ref{eq:log_det}) do log do determinante\footnote{Apesar de eu achar que não tem como o alimentar o optim com as inversas obtidas, para ganhar tempo}.
+Aqui existem duas formas. Eu preferi usar a que irei apresentar a seguir pois ela encaixa bem com o resultado (\ref{eq:log_det}) do log do determinante\footnote{Apesar de eu achar que não tem como o alimentar o optim com as inversas obtidas, para ganhar tempo}.
 
 Se 
 
@@ -188,7 +188,7 @@ $$
 
 # Contas no Gradiente
 
-Aqui a idéia é mitigar o custo computacional de $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \boldsymbol\theta_{k}}\Bigg)$ já que vão aparecer muitas matrizes nulas bem grandes em $\partial\Sigma / \partial \boldsymbol\theta_{k}$
+Aqui a idéia é mitigar o custo computacional de $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \theta_{k}}\Bigg) + y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y$ já que vão aparecer muitas matrizes nulas bem grandes em $\partial\Sigma / \partial \boldsymbol\theta_{k}$
 
 ## Relembrar é viver: Produto de Matrizes
 
@@ -224,10 +224,10 @@ Então desde as matrizes $\boldsymbol M$ e $\boldsymbol\Sigma_{\boldsymbol\theta
 \end{pmatrix}
 \end{equation}
 
-## Traços: $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \theta_{k}}\Bigg)$
 
-### Caso em que $\theta_{k} = \sigma^2_1$
+## Caso em que $\theta_{k} = \sigma^2_1$
 
+### Traço
 
 \begin{equation}
 \begin{aligned}
@@ -245,7 +245,7 @@ Então desde as matrizes $\boldsymbol M$ e $\boldsymbol\Sigma_{\boldsymbol\theta
   C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
   C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
   C_{21}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) \\
+  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) \\
 \end{pmatrix}
 \end{aligned}
 \end{equation}
@@ -270,8 +270,37 @@ C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \end{aligned}
 \end{equation}
 
-### Caso em que $\theta_{k} = \sigma^2_2$
+### Forma Quadrática
 
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix} y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  M(\textbf{h}|\nu_1,a) &  \\ 
+  \rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a) & \textbf{\huge o }
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix} y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  M(\textbf{h}|\nu_1,a)y_1 +  \rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_2 \\ 
+  \rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_1 
+\end{pmatrix} \\
+&= 
+y_1^{T}M(\textbf{h}|\nu_1,a)y_1 + 
+y_1^{T}\rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_1 \\
+&=
+y_1^{T}M(\textbf{h}|\nu_1,a)y_1 + 
+\rho \frac{\sigma_2}{\sigma_1} y_1^{T}M(\textbf{h}|\nu_3,a)y_2
+\end{aligned}
+\end{equation}
+
+## Caso em que $\theta_{k} = \sigma^2_2$
+
+### Traço
 
 \begin{equation}
 \begin{aligned}
@@ -286,7 +315,7 @@ C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \end{pmatrix}\\
 &= 
 \begin{pmatrix}
-  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
   C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{12}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
   C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
   C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
@@ -314,8 +343,40 @@ C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \end{aligned}
 \end{equation}
 
-### Caso em que $\theta_{k} = \rho$
+### Forma Quadrática
 
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \textbf{\huge o } &  \\ 
+  \rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a) &  
+  M(\textbf{h}|\nu_2,a)
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_2 \\ 
+  \rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_1 +
+    M(\textbf{h}|\nu_2,a)y_2
+\end{pmatrix} \\
+&= 
+y_2^{T}M(\textbf{h}|\nu_1,a)y_2 + 
+y_1^{T}\rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_1 \\
+&=
+y_2^{T}M(\textbf{h}|\nu_1,a)y_2 + 
+\rho \frac{\sigma_1}{\sigma_2} y_1^{T}M(\textbf{h}|\nu_3,a)y_2
+\end{aligned}
+\end{equation}
+
+
+## Caso em que $\theta_{k} = \rho$
+
+### Traço
 
 \begin{equation}
 \begin{aligned}
@@ -349,8 +410,37 @@ tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\S
 \end{aligned}
 \end{equation}
 
-### Caso em que $\theta_{k} = a$
+### Forma Quadrática
 
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \textbf{\huge o } &  \\ 
+  \sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a) &  
+  \textbf{\huge o }
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_2 \\ 
+  \sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_1
+\end{pmatrix} \\
+&= 
+y_1^{T}\sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_1 \\
+&=
+2\sigma_1 \sigma_2 y_1^{T}M(\textbf{h}|\nu_3,a)y_2
+\end{aligned}
+\end{equation}
+
+
+## Caso em que $\theta_{k} = a$
+
+### Traço
 
 \begin{equation}
 \begin{aligned}
@@ -389,6 +479,7 @@ tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\S
 Por outro lado, temos que 
 
 \begin{equation}
+\label{eq:matern_deriv}
 M^{'}(\textbf{h}|\nu,a) = \frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
 \frac{(\frac{2}{a})^{1-\nu}d^{\nu}}{\Gamma(\nu)}
   \Bigg[
@@ -396,12 +487,13 @@ M^{'}(\textbf{h}|\nu,a) = \frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} =
   \Bigg]
 \end{equation}
 
-Se definirmos
+em que $d := ||\textbf{h}||$. Assim, se definirmos
 
 \begin{equation}
+\label{eq:matern_deriv_labels}
 \begin{aligned}
-\phi_i &:= \frac{(\frac{2}{a})^{1-\nu_i}d^{\nu_i}}{\Gamma(\nu_i)} \\
-\Phi_i &:= \Bigg[ 2\nu_i K_{\nu_i}(ad) - ad K_{\nu_i + 1 }(ad) \Bigg]
+\phi_i &:= \frac{d(\frac{2}{ad})^{1-\nu_i}}{\Gamma(\nu_i)} \\
+\Phi_i(\textbf{h}) &:= \Bigg[ 2\nu_i K_{\nu_i}(ad) - ad K_{\nu_i + 1 }(ad) \Bigg]
 \end{aligned}
 \end{equation}
 
@@ -410,8 +502,55 @@ e desenvolvermos um pouco mais as contas, temos que
 \begin{equation}
 \begin{aligned}
 tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a}\Bigg) &= \text{ } 
-\sigma^2_1 \phi_1 tr\Bigg(C_{11}^{*}(\textbf{h}) \Phi_1 \Bigg) + \\
-& \sigma^2_2 \phi_2 tr\Bigg(C_{22}^{*}(\textbf{h}) \Phi_2 \Bigg) + \\
-& 2 \rho \sigma_1 \sigma_2 \phi_3 tr\Bigg(C_{12}^{*}(\textbf{h}) \Phi_3 \Bigg) 
+\sigma^2_1 \phi_1 tr\Bigg(C_{11}^{*}(\textbf{h}) \Phi_1(\textbf{h}) \Bigg) + \\
+& \sigma^2_2 \phi_2 tr\Bigg(C_{22}^{*}(\textbf{h}) \Phi_2(\textbf{h}) \Bigg) + \\
+& 2 \rho \sigma_1 \sigma_2 \phi_3 tr\Bigg(C_{12}^{*}(\textbf{h}) \Phi_3(\textbf{h}) \Bigg) 
+\end{aligned}
+\end{equation}
+
+### Forma Quadrática
+
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \sigma^2_1 M^{'}(\textbf{h}|\nu_1,a) &  \\ 
+  \rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a) & 
+  \sigma^2_2M ^{'}(\textbf{h}|\nu_2,a)
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \sigma^2_1 M^{'}(\textbf{h}|\nu_1,a)y_1 +
+  \rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_2\\ 
+  \rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_1 +
+  \sigma^2_2 M^{'}(\textbf{h}|\nu_2,a)y_2 
+\end{pmatrix} \\
+&= 
+y_1^{T}\sigma^2_1 M^{'}(\textbf{h}|\nu_1,a)y_1 +
+y_1^{T}\rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_1 +
+y_2^{T}\sigma^2_2 M^{'}(\textbf{h}|\nu_2,a)y_2 \\
+&= 
+\sigma^2_1 y_1^{T} M^{'}(\textbf{h}|\nu_1,a)y_1 +
+\sigma^2_2 y_2^{T} M^{'}(\textbf{h}|\nu_2,a)y_2 +
+2\rho \sigma_1 \sigma_2  y_1^{T}M^{'}(\textbf{h}|\nu_3,a)y_2
+\end{aligned}
+\end{equation}
+
+Se utilizarmos (\ref{eq:matern_deriv}) e (\ref{eq:matern_deriv_labels}) então obtemos que
+
+
+
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\sigma^2_1 \phi_1 y_1^{T}\Phi_1(\textbf{h}) y_1 +
+\sigma^2_2 \phi_2 y_2^{T} \Phi_2(\textbf{h}) y_2 +
+2\rho \sigma_1 \sigma_2  \phi_3 y_1^{T} \Phi_3(\textbf{h})y_2
 \end{aligned}
 \end{equation}
