@@ -110,7 +110,7 @@ C_{22}^{*}( \textbf{h} ) &=  C_{22}^{-1}( \textbf{h} ) -V_1V_2^{-1}V_1^{T}
 
 pois $V_1 = C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})$ fornece $V_1^{T} = C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})$. 
 
-Note ainda que $C_{12}^{*}( \textbf{h} ) = C_{12}^{*T}( \textbf{h} )$.
+Note ainda que $C_{12}^{*}( \textbf{h} ) = C_{21}^{*T}( \textbf{h} )$.
 
 \textbf{\underline{Prova:}}
 
@@ -261,12 +261,22 @@ C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 2 tr\Bigg( 
  C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
 \Bigg) \\
-&= tr\Bigg( 
+&= 
+tr\Bigg( 
 C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \Bigg) +
 \frac{\rho \sigma_2}{\sigma_1} tr\Bigg( 
  C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
-\Bigg)
+\Bigg) \\
+&= 
+\frac{1}{\sigma^2_1} tr\Bigg(C_{11}^{*}( \textbf{h} ) C_{11}( \textbf{h} ) \Bigg) +
+\frac{1}{\sigma^2_1} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) 
+\Bigg) \\
+&=
+\frac{1}{\sigma^2_1}\Bigg[ tr\Bigg(C_{11}^{*}( \textbf{h} ) C_{11}( \textbf{h} ) \Bigg) +tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) 
+\Bigg)\Bigg]
 \end{aligned}
 \end{equation}
 
@@ -294,7 +304,11 @@ y_1^{T}\rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_2 +
 y_2^{T}\rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_1 \\
 &=
 y_1^{T}M(\textbf{h}|\nu_1,a)y_1 + 
-\rho \frac{\sigma_2}{\sigma_1} y_1^{T}M(\textbf{h}|\nu_3,a)y_2
+\rho \frac{\sigma_2}{\sigma_1} y_1^{T}M(\textbf{h}|\nu_3,a)y_2 \\
+&=
+\frac{1}{\sigma^2_1} y_1^{T} \Bigg[
+C_{11}( \textbf{h} | \nu_1,a)y_1 + C_{12}( \textbf{h}| \nu_3,a)y_2
+\Bigg]
 \end{aligned}
 \end{equation}
 
@@ -335,11 +349,19 @@ C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
  C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
 \Bigg) \\
 &= tr\Bigg( 
-C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
+C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
 \Bigg) +
 \frac{\rho \sigma_1}{\sigma_2} tr\Bigg( 
  C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
-\Bigg)
+\Bigg) \\
+&= 
+\frac{1}{\sigma^2_2} tr\Bigg(C_{22}^{*}( \textbf{h} ) C_{22}( \textbf{h} ) \Bigg) +
+\frac{1}{\sigma^2_2} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) 
+\Bigg) \\
+&=
+\frac{1}{\sigma^2_2}\Bigg[ tr\Bigg(C_{22}^{*}( \textbf{h} ) C_{22}( \textbf{h} ) \Bigg) +tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) \Bigg)\Bigg] 
 \end{aligned}
 \end{equation}
 
@@ -369,7 +391,10 @@ y_1^{T}\rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_2 +
 y_2^{T}\rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_1 \\
 &=
 y_2^{T}M(\textbf{h}|\nu_1,a)y_2 + 
-\rho \frac{\sigma_1}{\sigma_2} y_1^{T}M(\textbf{h}|\nu_3,a)y_2
+\rho \frac{\sigma_1}{\sigma_2} y_1^{T}M(\textbf{h}|\nu_3,a)y_2 \\
+&=
+\frac{1}{\sigma^2_2} \Bigg[
+y^{T}_2 C_{22}( \textbf{h} | \nu_1,a) + y^{T}_1 C_{12}( \textbf{h}| \nu_3,a)\Bigg]y_2
 \end{aligned}
 \end{equation}
 

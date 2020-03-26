@@ -28,8 +28,8 @@ onde $\boldsymbol\theta = (\boldsymbol\sigma,\textbf{a},\boldsymbol\nu,\mu)$. Ne
 
 \begin{equation*}
 \begin{aligned}
-C_{11}( \textbf{h} ) {} &= \sigma_1 M( \textbf{h} | a,\nu_1)  \\
-C_{22}( \textbf{h} ) {} &= \sigma_2 M( \textbf{h} | a,\nu_2)  \\
+C_{11}( \textbf{h} ) {} &= \sigma^2_1 M( \textbf{h} | a,\nu_1)  \\
+C_{22}( \textbf{h} ) {} &= \sigma^2_2 M( \textbf{h} | a,\nu_2)  \\
 C_{12}( \textbf{h} ) {} &= \rho_{12} \sigma_1 \sigma_2 M( \textbf{h} | a, (\nu_1 + \nu_1)/ 2) \\
 M(\textbf{h} | \nu ,a) &= \frac{2^{1-\nu} (a d)^{\nu} K_{\nu}(a d)}{\Gamma(\nu)} 
 \end{aligned}
