@@ -88,7 +88,7 @@ C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h}) \Bigg[C_{11}(\textbf{h}) - C_{12}(\tex
 \end{aligned}
 \end{equation}
 
-Já que\footnote{No artigo $\Sigma$ é definida assim} $C_{12}(\textbf{h}) = C_{21}(\textbf{h})$, se definirmos
+Já que\footnote{No artigo $\Sigma$ é definida assim} $C_{12}(\textbf{h}) = C^{T}_{21}(\textbf{h})$, se definirmos
 
 \begin{equation}
 \begin{aligned}
@@ -238,14 +238,14 @@ Então desde as matrizes $\boldsymbol M$ e $\boldsymbol\Sigma_{\boldsymbol\theta
 \end{pmatrix}
 \begin{pmatrix}
   M(\textbf{h} | \nu_1,a) & \\
-  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
+  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) & \textbf{\huge o }
 \end{pmatrix} \\
 &= 
 \begin{pmatrix}
-  C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
-  C_{21}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) \\
+  C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a)\\
+  C_{21}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) \\
 \end{pmatrix}
 \end{aligned}
 \end{equation}
@@ -259,14 +259,14 @@ tr\Bigg(
 C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \Bigg) +
 2 tr\Bigg( 
- C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a)
 \Bigg) \\
 &= 
 tr\Bigg( 
 C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 \Bigg) +
 \frac{\rho \sigma_2}{\sigma_1} tr\Bigg( 
- C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \nu_3,a)
 \Bigg) \\
 &= 
 \frac{1}{\sigma^2_1} tr\Bigg(C_{11}^{*}( \textbf{h} ) C_{11}( \textbf{h} ) \Bigg) +
@@ -325,14 +325,14 @@ C_{11}( \textbf{h} | \nu_1,a)y_1 + C_{12}( \textbf{h}| \nu_3,a)y_2
 \end{pmatrix}
 \begin{pmatrix}
   \textbf{\huge o } & \\
-  \frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & M(\textbf{h} | \nu_2,a)
+  \frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) & M(\textbf{h} | \nu_2,a)
 \end{pmatrix}\\
 &= 
 \begin{pmatrix}
-  C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{12}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
-  C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+  C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) + C_{12}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+  C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) + C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
 \end{pmatrix}
 \end{aligned}
 \end{equation}
@@ -346,13 +346,13 @@ tr\Bigg(
 C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
 \Bigg) +
 2 tr\Bigg( 
- C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a)
 \Bigg) \\
 &= tr\Bigg( 
 C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
 \Bigg) +
 \frac{\rho \sigma_1}{\sigma_2} tr\Bigg( 
- C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \nu_3,a)
 \Bigg) \\
 &= 
 \frac{1}{\sigma^2_2} tr\Bigg(C_{22}^{*}( \textbf{h} ) C_{22}( \textbf{h} ) \Bigg) +
@@ -412,14 +412,14 @@ y^{T}_2 C_{22}( \textbf{h} | \nu_1,a) + y^{T}_1 C_{12}( \textbf{h}| \nu_3,a)\Big
 \end{pmatrix}
 \begin{pmatrix}
   \textbf{\huge o } & \\
-  \sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
+  \sigma_1\sigma_2 M(\textbf{h} | \nu_3,a) & \textbf{\huge o }
 \end{pmatrix}\\
 &= 
 \begin{pmatrix}
-  C_{12}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{11}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
-  C_{22}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{21}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
+  C_{12}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a)\\
+  C_{22}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a)\\
 \end{pmatrix}
 \end{aligned}
 \end{equation}
@@ -430,7 +430,7 @@ Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
 \begin{aligned}
 tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \rho}\Bigg) &= 
 2\sigma_1\sigma_2tr\Bigg( 
- C_{22}^{*}( \textbf{h} ) M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \nu_3,a)
 \Bigg)
 \end{aligned}
 \end{equation}
@@ -476,16 +476,16 @@ y_2^{T}\sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_1 \\
 \end{pmatrix}
 \begin{pmatrix}
   \sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) & 
-  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a)\\
-  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
+  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a)\\
+  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) &
   \sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)
 \end{pmatrix}\\
 &= 
 \begin{pmatrix}
-  C_{11}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{12}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{11}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{12}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
-  C_{21}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{22}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) &
-  C_{21}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) + C_{22}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
+  C_{11}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{12}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) + C_{12}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
+  C_{21}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{22}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) + C_{22}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
 \end{pmatrix}
 \end{aligned}
 \end{equation}
@@ -497,7 +497,7 @@ Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
 tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a}\Bigg) = \text{ } 
 & \sigma^2_1 tr\Bigg(C_{11}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_1,a) \Bigg) + \\
 & \sigma^2_2 tr\Bigg(C_{22}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_2,a) \Bigg) + \\
-& 2 \rho \sigma_2 \sigma_2 tr\Bigg(C_{12}^{*}(\textbf{h}) M^{'}(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) \Bigg)
+& 2 \rho \sigma_2 \sigma_2 tr\Bigg(C_{12}^{*}(\textbf{h}) M^{'}(\textbf{h} | \nu_3,a) \Bigg)
 \end{aligned}
 \end{equation}
 

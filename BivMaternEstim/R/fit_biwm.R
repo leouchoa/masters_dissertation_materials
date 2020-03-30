@@ -19,7 +19,7 @@
 #' n <- 40
 #' coords <- matrix(runif(2*n), ncol = 2)
 #' temp <- rnorm(2*n)
-#' S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = c(0.5, 0.5), coords_matrix = coords,combined=TRUE)
+#' S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = c(0.5, 0.5), coords_matrix = coords, combined = TRUE)
 #' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #'
 #' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5))

@@ -1,4 +1,4 @@
-block_inv <- function(matrix_list){
+block_inv <- function(matrix_list,combined = FALSE){
   
   V_1 <- solve(matrix_list[[2]],matrix_list[[3]])
   
@@ -17,7 +17,11 @@ block_inv <- function(matrix_list){
               # C_21_star = t(C_12_st),
               C_22_star = C_22_st)
   
-  return(out)
+  if(combined){
+    return(
+      cbind(rbind(C_11_st, t(C_12_st)), rbind(C_12_st, C_22_st))
+    ) 
+  }else return(out)
 }
 
 

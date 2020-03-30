@@ -28,6 +28,12 @@ block_LLike_biwm_grad <- function(theta,
  
   autocov_matrix_inv <- block_inv(autocov_matrix)
   
+  y_1 <- autocov_matrix_inv$C_11_star %*% obs_matrix[,1] +
+               autocov_matrix_inv$C_12_star %*% obs_matrix[,2]
+  
+  y_2 <- t(autocov_matrix_inv$C_12_star) %*% obs_matrix[,1] +
+               autocov_matrix_inv$C_22_star %*% obs_matrix[,2]
+  
   # ----- Grad of sigma^2_1 -----
   sigma_1_tr <- 
     (
@@ -36,11 +42,11 @@ block_LLike_biwm_grad <- function(theta,
     ) / sigmas[1]
   
   sigma_1_qf <- 
-    as.double(t(obs_matrix[,1]) %*% 
-                (autocov_matrix$C_11 %*% obs_matrix[,1] + 
-                   autocov_matrix$C_12 %*% obs_matrix[,2]))/ sigmas[1]
+    as.double(t(y_1) %*% 
+                (autocov_matrix$C_11 %*% y_1 + 
+                   autocov_matrix$C_12 %*% y_2))/ sigmas[1]
   
-  sigma_1_grad <- sigma_1_tr - sigma_1_qf
+  sigma_1_grad <- sigma_1_tr + sigma_1_qf
   
   
   # ----- Grad of sigma^2_2 -----
@@ -54,10 +60,10 @@ block_LLike_biwm_grad <- function(theta,
   
   sigma_2_qf <- 
     as.double(
-      (t(obs_matrix[,2]) %*% autocov_matrix$C_22 +
-         t(obs_matrix[,1]) %*% autocov_matrix$C_12) %*% obs_matrix[,2]) / sigmas[2]
+      (t(y_2) %*% autocov_matrix$C_22 +
+         t(y_1) %*% autocov_matrix$C_12) %*% y_2) / sigmas[2]
   
-  sigma_2_grad <- sigma_2_tr - sigma_2_qf
+  sigma_2_grad <- sigma_2_tr + sigma_2_qf
   
   
   # ----- Grad of rho -----
@@ -68,14 +74,14 @@ block_LLike_biwm_grad <- function(theta,
   
   rho_tr <- 2*sqrt(sigmas[1]*sigmas[2]) * 
     tr(
-      autocov_matrix_inv$C_22_star %*% M_nu_3
+      autocov_matrix_inv$C_12_star %*% M_nu_3
     )
   
   rho_qf <- as.double(
     2*sqrt(sigmas[1]*sigmas[2]) * 
-      t(obs_matrix[,1]) %*% M_nu_3 %*% obs_matrix[,2])
+      t(y_1) %*% M_nu_3 %*% y_2)
   
-  rho_grad <- rho_tr - rho_qf
+  rho_grad <- rho_tr + rho_qf
   
   # ----- Grad of a -----
   
@@ -98,11 +104,11 @@ block_LLike_biwm_grad <- function(theta,
         matern_deriv(a = as[3],nu = nus[3],coords_matrix = coords_matrix))
   
   a_qf <- as.double(
-    sigmas[1] * t(obs_matrix[,1]) %*% M_nu_1 %*% obs_matrix[,1] +
-      sigmas[2] * t(obs_matrix[,2]) %*% M_nu_2 %*% obs_matrix[,2] + 
-      2*rho*sqrt(sigmas[1]*sigmas[2])  * t(obs_matrix[,1]) %*% M_nu_3 %*% obs_matrix[,2])
+    sigmas[1] * t(y_1) %*% M_nu_1 %*% y_1 +
+      sigmas[2] * t(y_2) %*% M_nu_2 %*% y_2 + 
+      2*rho*sqrt(sigmas[1]*sigmas[2])  * t(y_1) %*% M_nu_3 %*% y_2)
   
-  a_grad <- a_tr - a_qf
+  a_grad <- a_tr + a_qf
   
   
   return(c(
@@ -114,7 +120,7 @@ block_LLike_biwm_grad <- function(theta,
 }
 
 
-# ---- Usage ----
+# # ---- Usage ----
 # 
 # source("block_inv.R")
 # source("utils.R")
@@ -122,20 +128,20 @@ block_LLike_biwm_grad <- function(theta,
 # source("matern_cov_wrapper.R")
 # source("sigma_assembler_biwm.R")
 # 
-# aux_assembler_autocov <- function(matrix_list){
-#   cbind(
-#     rbind(matrix_list[[1]], matrix_list[[3]]),
-#     rbind(matrix_list[[3]], matrix_list[[2]])
-#   )
-# }
-# 
 # n <- 40
 # theta_test <- c(2,1.2,3,0.4)
 # coords_test <- matrix(runif(2*n), ncol = 2)
 # nus_test <- rep(0.5,2)
-# S <- aux_assembler_autocov(sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = nus_test, coords_matrix = coords_test))
+# S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = nus_test, coords_matrix = coords_test,combined = TRUE)
 # temp <- rnorm(2*n)
 # log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 # 
+# new_grad <- block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
 # 
-# block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
+# source("../old_code/matrices_assembler.R")
+# source("../old_code/general_LLike_deriv.R")
+# source("../old_code/LLike_biwm_reduced_grad.R")
+# source("../old_code/sigma_assembler_biwm.R")
+# 
+# old_grad <- LLike_biwm_reduced_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
+# 
