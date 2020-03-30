@@ -3,3 +3,4 @@
 export(LLike_biwm)
 export(fit_biwm)
 export(sigma_assembler_biwm)
+importFrom(fields,Matern)
