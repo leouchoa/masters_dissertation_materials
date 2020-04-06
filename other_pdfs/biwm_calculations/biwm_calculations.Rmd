@@ -1,0 +1,792 @@
+---
+title: "Biwm Calculations"
+author: "Leonardo Uchoa"
+header-includes:
+- \usepackage[brazil]{babel}
+- \usepackage{graphicx}
+- \usepackage{amsmath,amssymb}
+output:
+    pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Conteúdo do documento
+Neste documento estão presentes todas as contas feitas para a implementação da estimação por máxima verossimilhança do modelo Matérn Bivariado proposto por Gneiting. Aqui aproveita-se a estrutura de blocos da matriz de covariância cruzada para melhor estimar os parâmetros.
+
+# Formulação
+
+Para o modelo (Cressie)
+
+\begin{equation}
+\textbf{Y}^{*}(\textbf{s}) = \mu (\textbf{s}) + \eta(\textbf{s}) +  \epsilon(\textbf{s})
+\end{equation}
+
+temos que $\textbf{s} \in \mathbb{R}^2$ e que 
+
+- $\mu(\textbf{s})$ é a variação determinística (de grande escala);
+
+- $\eta(\textbf{s})$ é o efeito aleatório espacial (variação de pequena escala, dependente da resolução dos dados);
+
+- $\epsilon(\textbf{s})$ é a variação em escala micro (não detectável na resolução (condicional) dos dados).
+
+Agora adapta-se esta formulação para o cenário multivariado
+
+\begin{equation}
+\label{eq:mvt_cress}
+\textbf{Y}^{*}(\textbf{s}) = \boldsymbol \mu (\textbf{s}) + \boldsymbol \eta(\textbf{s}) + \boldsymbol \epsilon(\textbf{s})
+\end{equation}
+
+em que novamente $\textbf{s} \in \mathbb{R}^2$, e
+
+- $\boldsymbol \mu(\textbf{s})$ é o vetor de variações determinísticas (de grande escala);
+
+- $\boldsymbol \eta(\textbf{s})$ é o vetor de efeitos aleatórios espaciais (variações de pequena escala, dependentes da resolução dos dados);
+
+- $\boldsymbol \epsilon(\textbf{s})$ é o vetor de variações em escala micro (não detectáveis na resolução (condicional) dos dados).
+
+de forma que o processo $\textbf{Y}$ é bivariado com a seguinte estrutura
+
+\begin{equation}
+\label{eq:non_vec_Y}
+\textbf{Y}^{*}(\textbf{s}) = \begin{pmatrix}
+Y_{11}(\textbf{s}) & Y_{12}(\textbf{s}) \\
+\vdots & \vdots \\
+Y_{N1}(\textbf{s}) & Y_{N2}(\textbf{s}) 
+\end{pmatrix}
+\end{equation}
+
+Neste ponto a estrateǵia é modelar as observações bivariadas do processo espacial por meio de uma Normal Bivariada. Ou seja, cada par de observações $\Big(Y_{i1}(\textbf{s}), Y_{i2}(\textbf{s})\Big)$ seria uma realização de $N_2(\boldsymbol \mu, \Sigma)$, indexada (de alguma maneira) no  espaço. Para isto é interessante reformular a equação (\ref{eq:non_vec_Y}) em termos da função Vec($\cdot$):
+
+\begin{equation}
+\textbf{Y}(\textbf{s}) := Vec(\textbf{Y}^{*}(\textbf{s})) = 
+\begin{pmatrix}
+Y_{11}(\textbf{s}) \\ 
+Y_{12}(\textbf{s}) \\
+\vdots \\ 
+Y_{N1}(\textbf{s}) \\
+Y_{N2}(\textbf{s}) 
+\end{pmatrix}
+\end{equation}
+
+em que atribui-se ao processo $\textbf{Y}(\textbf{s})$ a distribuição Normal Multivariada com vetor de funções médias $\boldsymbol \mu^{T}(\textbf{s}) = (\mu_1(\textbf{s}),\mu_2(\textbf{s}))$ e função de covariância cruzada $\boldsymbol\Sigma (\textbf{h})$ com estrutura dada por
+
+\begin{equation}
+\boldsymbol\Sigma (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}( \textbf{h} ) & C_{12}( \textbf{h} ) \\
+  C_{21}( \textbf{h} ) & C_{22}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+Assume-se também estacionariedade de segunda ordem para este processo, onde as funções médias não dependem das localizações e as funções de covariâncias simples e cruzadas só dependem da distância entre as observações. Isto é
+
+\begin{equation}
+\begin{aligned}
+&E(Y_{i1}^{*}(\textbf{s + h})) = E(Y_{i1}(\textbf{s})) = \mu_1\\
+&E(Y_{i2}^{*}(\textbf{s + h})) = E(Y_{i2}(\textbf{s})) = \mu_2\\
+&E(Y_{i2}^{*}(\textbf{s + h})Y_{i2}^{*}(\textbf{s})) = C_{11}(\textbf{||s-h||})\\
+&E(Y_{i1}^{*}(\textbf{s + h})Y_{i2}^{*}(\textbf{s})) = C_{22}(\textbf{||s-h||}) \\
+&E(Y_{i2}^{*}(\textbf{s + h})Y_{i1}^{*}(\textbf{s})) = C_{12}(\textbf{||s-h||}) \\
+&E(Y_{i1}^{*}(\textbf{s + h})Y_{i2}^{*}(\textbf{s})) = C_{21}(\textbf{||s-h||})
+\end{aligned}
+\end{equation}
+
+Neste momento postulam-se funções para estruturar $C_{ij}(\textbf{s})$. Aqui as funções serão Matérn, formuladas de forma que a sua composição em $\boldsymbol\Sigma (\textbf{h})$, dita $\boldsymbol\Sigma_{\boldsymbol \theta} (\textbf{h})$ com $\boldsymbol\theta = (\boldsymbol\sigma,\textbf{a},\boldsymbol\nu,\mu)$, formam a função de covariância Matérn Bivariada. Neste momento restringe-se ao modelo reduzido (parsimonioso) que induz às funções de covarâncias e covariâncias cruzadas
+
+\begin{equation*}
+\begin{aligned}
+C_{11}( \textbf{h} ) {} &= \sigma^2_1 M( \textbf{h} | a,\nu_1)  \\
+C_{22}( \textbf{h} ) {} &= \sigma^2_2 M( \textbf{h} | a,\nu_2)  \\
+C_{12}( \textbf{h} ) {} &= \rho_{12} \sigma_1 \sigma_2 M( \textbf{h} | a, (\nu_1 + \nu_1)/ 2) \\
+M(\textbf{h} | \nu ,a) &= \frac{2^{1-\nu} (a d)^{\nu} K_{\nu}(a d)}{\Gamma(\nu)} 
+\end{aligned}
+\end{equation*}
+
+onde $\boldsymbol\theta = (\sigma_1,\sigma_2,a, \mu_1, \mu_2)$. Toda esta formulação nos permite escrever a log-verossimilhança do processo como a de uma normal multivariada
+
+\begin{equation}
+l(\boldsymbol\theta) = -1/2  \big( log( |\boldsymbol\Sigma_{\boldsymbol\theta}| )  +
+\textbf{x}^{t} \boldsymbol\Sigma^{-1}_{\boldsymbol\theta}  \textbf{x} + 2Nlog(2\pi)\big)
+\label{eq:log_like}
+\end{equation}
+
+# Derivadas
+
+## Fórmula Geral da Derivada da Log-verossimilhança
+
+Ao derivarmos \ref{eq:log_like} em relação a qualquer elemento, $\theta$, de $\boldsymbol\theta$, temos a expressão geral da derivada da log-verossimilhança:
+
+\begin{equation}
+\frac{ \partial l(\boldsymbol\theta) }{ \partial \theta} =
+tr \Big( \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+        \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+              {\partial \theta}
+    \Big) -
+\textbf{x}^{t} 
+  \Bigg[ 
+    \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+    \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+    {\partial \theta}
+    \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+    \Bigg]
+\textbf{x}.
+\label{eq:log_like_deriv_geral}
+\end{equation}
+
+Então se $y = \textbf{x} \boldsymbol\Sigma^{-1}_{\boldsymbol\theta}$, pela simetria da função de covariância Matérn Bivariada tem-se que
+
+\begin{equation}
+\frac{ \partial l(\boldsymbol\theta) }{ \partial \theta} =
+tr \Big( \boldsymbol\Sigma^{-1}_{\boldsymbol\theta} 
+        \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+              {\partial \theta}
+    \Big) -
+\textbf{y}^{t} 
+  \Bigg[ 
+    \frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta}}
+    {\partial \theta}
+    \Bigg]
+\textbf{y}.
+\label{eq:log_like_deriv_geral}
+\end{equation}
+
+
+## Derivada das Funções de Covariâncias
+
+Para obter $\partial \boldsymbol\Sigma_{\boldsymbol\theta}/ \partial \theta$, onde $\boldsymbol\theta=(\sigma^2_1,\sigma^2_2,a,\rho,\mu_1,\mu_2)$, vamos utilizar a regra da cadeia passo a passo.
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a  $\sigma^2_1$
+
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+      {\partial \sigma^2_1}= 
+\begin{pmatrix}
+  M(\textbf{h} | \nu_1,a) & \\
+  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
+
+\end{pmatrix}
+\end{equation}
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a  $\sigma^2_2$
+
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+      {\partial \sigma^2_2}= 
+\begin{pmatrix}
+  \textbf{\huge o } & \\
+  \frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & M(\textbf{h} | \nu_2,a)
+
+\end{pmatrix}
+\end{equation}
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a  $\rho$
+
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+      {\partial \sigma^2_2}= 
+\begin{pmatrix}
+  \textbf{\huge o } & \\
+  \sigma_1 \sigma_2 M(\textbf{h} | \frac{\nu_1 + \nu_2}{2},a) & \textbf{\huge o }
+
+\end{pmatrix}
+\end{equation}
+
+### Derivada de $\boldsymbol\Sigma_{\boldsymbol\theta}$ c.r.a a
+
+Neste caso temos que
+
+\begin{equation}
+\frac{\partial \boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})}
+     {\partial a} =
+\begin{pmatrix}
+  \sigma^2_1 \psi_1 & \rho \sigma^2_1\sigma^2_2 \psi_{3} \\
+  \rho \sigma^2_1\sigma^2_2 \psi_{3} & \sigma^2_2 \psi_{2}
+\end{pmatrix}
+\end{equation}
+
+onde $\psi_{k}$ é a derivada de $\partial M(\textbf{h} | \nu_k ,a)$ c.r.a $a$ para $k = 1,2,3$, em que  $\nu_3 = (\nu_1 + \nu_1)/ 2)$. Agora  
+
+\begin{equation}
+\frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
+\frac{2^{1-\nu}d^{\nu}}{\Gamma(\nu)} 
+  \Bigg[
+    \nu a^{\nu -1} K_{\nu}(ad) + a^{\nu} \frac{\partial K_{\nu}(ad)}{\partial a}
+  \Bigg]
+\end{equation}
+
+e, como 
+
+\begin{equation}
+\frac{\partial K_{\nu}(ad)}{\partial a} = 
+d \Bigg[ 
+    \frac{\nu}{ad} K_{\nu}(ad) - K_{\nu + 1 }(ad)
+  \Bigg] 
+\end{equation}
+
+então
+
+\begin{equation}
+\frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
+\frac{2^{1-\nu}d^{\nu}}{\Gamma(\nu)} 
+  \Bigg[
+    \nu a^{\nu -1} K_{\nu}(ad) + 
+    a^{\nu}d \Bigg(
+              \frac{\nu}{ad} K_{\nu}(ad) - K_{\nu + 1 }(ad)
+              \Bigg)
+  \Bigg].
+\end{equation}
+
+Ao simplificar a última equação, obtem-se que
+
+\begin{equation}
+\psi_i = \frac{2^{1-\nu_i}d^{\nu}a^{\nu_i -1}}{\Gamma(\nu_i)}
+  \Bigg[
+    2\nu_i K_{\nu_i}(ad) - ad K_{\nu_i + 1 }(ad)
+  \Bigg]
+\end{equation}
+
+# Estrutura de Blocos para Contas na Log-Verossimilhança
+## Log do Determinante
+
+Todas as contas a seguir tem o intuito de melhorar problemas de instabilidade numérica, reduzir o custo computacional de inversas.
+
+Se 
+
+\begin{equation}
+\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}( \textbf{h} ) & C_{12}( \textbf{h} ) \\
+  C_{21}( \textbf{h} ) & C_{22}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+Então 
+
+\begin{equation}
+det(\Sigma) = | \Sigma | =
+  \Bigg|
+      C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})
+  \Bigg| * \Bigg| C_{22}(\textbf{h}) \Bigg|
+\end{equation}
+
+Portanto, com o logarítmo fica
+
+\begin{equation}
+\label{eq:log_det}
+log(det(\Sigma)) = 
+  log\Bigg|
+      C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})
+  \Bigg| + 
+  log\Bigg| C_{22}(\textbf{h}) \Bigg|
+\end{equation}
+
+<!-- ### Extra -->
+
+<!-- Para o nosso caso também é válido que  -->
+
+<!-- $$ -->
+<!-- det(\Sigma) = \Bigg| C_{11}(\textbf{h})C_{22}(\textbf{h}) - -->
+<!-- C_{12}(\textbf{h})C_{21}(\textbf{h})\Bigg| -->
+<!-- $$ -->
+<!-- pois as matrizes $C_{12}(\textbf{h})$ e $C_{22}(\textbf{h})$ comutam. Além disso como $C_{12}(\textbf{h}) = C_{21}(\textbf{h})$ -->
+
+<!-- $$ -->
+<!-- det(\Sigma) = \Bigg| C_{11}(\textbf{h})C_{22}(\textbf{h}) - -->
+<!-- C^{2}_{12}(\textbf{h})\Bigg| -->
+<!-- $$ -->
+
+## Inversa
+
+Aqui existem duas formas. Eu preferi usar a que irei apresentar a seguir pois ela encaixa bem com o resultado (\ref{eq:log_det}) do log do determinante\footnote{Apesar de eu achar que não tem como o alimentar o optim com as inversas obtidas, para ganhar tempo}.
+
+Se 
+
+\begin{equation}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+Então 
+
+\begin{equation}
+\label{eq_sistem:block_inv}
+\begin{aligned}
+C_{11}^{*}( \textbf{h} ) &= %C_{11}
+\Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1} \\
+C_{12}^{*}( \textbf{h} ) &= - %C_{12}
+\Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1}C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})  \\
+C_{21}^{*}( \textbf{h} ) &= -  %C_{21}
+C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h}) \Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1}  \\
+C_{22}^{*}( \textbf{h} ) &= C_{22}^{-1}(\textbf{h}) + %C_{22}
+C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h}) \Bigg[C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})  \Bigg]^{-1}C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})  \\
+\end{aligned}
+\end{equation}
+
+Já que\footnote{No artigo $\Sigma$ é definida assim} $C_{12}(\textbf{h}) = C^{T}_{21}(\textbf{h})$, se definirmos
+
+\begin{equation}
+\begin{aligned}
+V_1 &:= C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h}) \\
+V_2 &:= C_{11}(\textbf{h}) - C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})
+\end{aligned}
+\end{equation}
+
+podemos obter uma forma simplificada para o sistema (\ref{eq_sistem:block_inv}), já que como $C_{11},C_{12},C_{21},C_{22}$ são simétricas
+
+\begin{equation}
+\begin{aligned}
+C_{11}^{*}( \textbf{h} ) &= V_2^{-1} \\
+C_{12}^{*}( \textbf{h} ) &= -V_2^{-1}V_1^{T} \\
+C_{21}^{*}( \textbf{h} ) &= -V_1V_2^{-1} \\
+C_{22}^{*}( \textbf{h} ) &=  C_{22}^{-1}( \textbf{h} ) -V_1V_2^{-1}V_1^{T}
+\end{aligned}
+\end{equation}
+
+pois $V_1 = C_{22}^{-1}(\textbf{h})C_{21}(\textbf{h})$ fornece $V_1^{T} = C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})$. 
+
+Note ainda que $C_{12}^{*}( \textbf{h} ) = C_{21}^{*T}( \textbf{h} )$.
+
+\textbf{\underline{Prova:}}
+
+Primeiramente
+
+\begin{equation}
+\begin{aligned}
+V_2^{T} &= C_{11}(\textbf{h}) - (C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{12}(\textbf{h}))^{T} \\
+&=C_{11}(\textbf{h}) -
+C_{12}(\textbf{h})(C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h}))^{T} \\
+&=C_{11}(\textbf{h}) - 
+C_{12}(\textbf{h})C_{22}^{-1}(\textbf{h})C_{12}(\textbf{h}) 
+\\
+&= V_2
+\end{aligned}
+\end{equation}
+
+Agora
+
+\begin{equation}
+\begin{aligned}
+C_{12}^{*T}( \textbf{h} ) &= -(V_2^{-1}V_1^{T})^{T} \\
+&= V_1^{T}(V_2^{-1})^{T} \\
+&= V_1^{T}(V_2^{-1}) \\
+&= C_{21}^{*}( \textbf{h} )
+\end{aligned}
+\end{equation}
+
+## Avaliação de $\boldsymbol\Sigma^{-1}$ na log-verossimilhança
+
+Neste caso precisamos avaliar $y^{T}\boldsymbol\Sigma^{-1}y$. A estrutura de blocos também pode nos ajudar a deixar o algorítmo um pouco mais estável e rápido.
+
+Novamente a inversa de $\boldsymbol\Sigma$ é denotada por
+
+\begin{equation}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+Agora se $y^{T} = (y_1,y_2)^{T}$, em que $y_1$ e $y_2$ são, respectivamente, os vetores resposta associados às primeira e segunda variáveis multivariadas, temos que 
+
+\begin{equation}
+\label{eq:inv_log_like}
+\begin{aligned}
+y^{T}\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h})y &=
+y^{T}\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}y \\
+&=(y_1,y_2)^{T}\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}\begin{pmatrix}y_1 \\ y_2\end{pmatrix} \\
+&= (y_1,y_2)^{T}\begin{pmatrix}
+C_{11}^{*}( \textbf{h} )y_1 + C_{12}^{*}( \textbf{h} )y_2 \\
+  C_{21}^{*}( \textbf{h} )y_1 + C_{22}^{*}( \textbf{h} )y_2
+\end{pmatrix} \\
+&= y_1^{T}C_{11}^{*}( \textbf{h} )y_1 + y_1^{T}C_{12}^{*}( \textbf{h} )y_2 + y_2^{T}C_{21}^{*}( \textbf{h} )y_1 + y_2^{T}C_{22}^{*}( \textbf{h} )y_2 \\
+&= y_1^{T}C_{11}^{*}( \textbf{h} )y_1 + 2y_1^{T}C_{12}^{*}( \textbf{h} )y_2 + y_2^{T}C_{22}^{*}( \textbf{h} )y_2
+\end{aligned}
+\end{equation}
+
+pois como $C_{12}^{*T}( \textbf{h} ) = C_{21}^{*}( \textbf{h} )$ obtemos que 
+
+$$y_1^{T}C_{12}^{*}( \textbf{h} )y_2 = tr(y_1^{T}C_{12}^{*}( \textbf{h} )y_2) = tr(y_1^{T}C_{12}^{*}( \textbf{h} )y_2)^{T} = tr((C_{12}^{*}( \textbf{h} )y_2)^{T}y_1) =  tr(y_2^{T}C_{12}^{*T}( \textbf{h} )y_1) = y_2^{T}C_{21}^{*}( \textbf{h} )y_1$$
+Também é possível escrever o resultado anterior em termos de (\ref{eq:inv_log_like}), o que fornece
+
+$$
+y_1^{T}V_2^{-1}y_1 - 2y_1^{T}V_2^{-1}V_1^{T}y_2 + y_2^{T}C_{22}^{-1}y_2 - y_2^{T}V_1V_2^{-1}V_1^{T}y_2
+$$
+
+
+# Estrutura de Blocos para Contas no Gradiente
+
+Aqui a idéia é mitigar o custo computacional de $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \theta_{k}}\Bigg) + y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y$ já que vão aparecer muitas matrizes nulas bem grandes em $\partial\Sigma / \partial \boldsymbol\theta_{k}$
+
+## Relembrar é viver: Produto de Matrizes
+
+Se 
+
+\begin{equation}
+\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h}) =
+\begin{pmatrix}
+  C_{11}( \textbf{h} ) & C_{12}( \textbf{h} ) \\
+  C_{21}( \textbf{h} ) & C_{22}( \textbf{h} )
+\end{pmatrix}
+\end{equation}
+
+e 
+
+\begin{equation}
+\boldsymbol M  =
+\begin{pmatrix}
+  A & B \\
+  C & D
+\end{pmatrix}
+\end{equation}
+
+Então desde as matrizes $\boldsymbol M$ e $\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h})$ sejam conformes
+
+\begin{equation}
+\boldsymbol\Sigma_{\boldsymbol\theta} (\textbf{h}) \boldsymbol M =
+\begin{pmatrix}
+  C_{11}( \textbf{h} )A + C_{12}( \textbf{h} )C &
+  C_{11}( \textbf{h} )B + C_{12}( \textbf{h} )D\\
+  C_{21}( \textbf{h} )A + C_{22}( \textbf{h} )C &
+  C_{21}( \textbf{h} )B + C_{22}( \textbf{h} )D\\
+\end{pmatrix}
+\end{equation}
+
+
+## Caso em que $\theta_{k} = \sigma^2_1$
+
+### Traço
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  M(\textbf{h} | \nu_1,a) & \\
+  \frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) & \textbf{\huge o }
+\end{pmatrix} \\
+&= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a)\\
+  C_{21}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a) + C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a) \\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_1}\Bigg) &= 
+tr\Bigg( 
+C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
+\Bigg) +
+2 tr\Bigg( 
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a)
+\Bigg) \\
+&= 
+tr\Bigg( 
+C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
+\Bigg) +
+\frac{\rho \sigma_2}{\sigma_1} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \nu_3,a)
+\Bigg) \\
+&= 
+\frac{1}{\sigma^2_1} tr\Bigg(C_{11}^{*}( \textbf{h} ) C_{11}( \textbf{h} ) \Bigg) +
+\frac{1}{\sigma^2_1} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) 
+\Bigg) \\
+&=
+\frac{1}{\sigma^2_1}\Bigg[ tr\Bigg(C_{11}^{*}( \textbf{h} ) C_{11}( \textbf{h} ) \Bigg) +tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) 
+\Bigg)\Bigg]
+\end{aligned}
+\end{equation}
+
+### Forma Quadrática
+
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix} y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  M(\textbf{h}|\nu_1,a) &  \\ 
+  \rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a) & \textbf{\huge o }
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix} y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  M(\textbf{h}|\nu_1,a)y_1 +  \rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_2 \\ 
+  \rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_1 
+\end{pmatrix} \\
+&= 
+y_1^{T}M(\textbf{h}|\nu_1,a)y_1 + 
+y_1^{T}\rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\rho \frac{\sigma_2}{2\sigma_1} M(\textbf{h}|\nu_3,a)y_1 \\
+&=
+y_1^{T}M(\textbf{h}|\nu_1,a)y_1 + 
+\rho \frac{\sigma_2}{\sigma_1} y_1^{T}M(\textbf{h}|\nu_3,a)y_2 \\
+&=
+\frac{1}{\sigma^2_1} y_1^{T} \Bigg[
+C_{11}( \textbf{h} | \nu_1,a)y_1 + C_{12}( \textbf{h}| \nu_3,a)y_2
+\Bigg]
+\end{aligned}
+\end{equation}
+
+## Caso em que $\theta_{k} = \sigma^2_2$
+
+### Traço
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_2} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  \textbf{\huge o } & \\
+  \frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) & M(\textbf{h} | \nu_2,a)
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+  C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) + C_{12}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+  C_{22}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a) + C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)\\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \sigma^2_2}\Bigg) &= 
+tr\Bigg( 
+C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
+\Bigg) +
+2 tr\Bigg( 
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_1}{2 \sigma_2} M(\textbf{h} | \nu_3,a)
+\Bigg) \\
+&= tr\Bigg( 
+C_{22}^{*}( \textbf{h} )M(\textbf{h} | \nu_2,a)
+\Bigg) +
+\frac{\rho \sigma_1}{\sigma_2} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \nu_3,a)
+\Bigg) \\
+&= 
+\frac{1}{\sigma^2_2} tr\Bigg(C_{22}^{*}( \textbf{h} ) C_{22}( \textbf{h} ) \Bigg) +
+\frac{1}{\sigma^2_2} tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) 
+\Bigg) \\
+&=
+\frac{1}{\sigma^2_2}\Bigg[ tr\Bigg(C_{22}^{*}( \textbf{h} ) C_{22}( \textbf{h} ) \Bigg) +tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) C_{12}( \textbf{h} ) \Bigg)\Bigg] 
+\end{aligned}
+\end{equation}
+
+### Forma Quadrática
+
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \textbf{\huge o } &  \\ 
+  \rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a) &  
+  M(\textbf{h}|\nu_2,a)
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_2 \\ 
+  \rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_1 +
+    M(\textbf{h}|\nu_2,a)y_2
+\end{pmatrix} \\
+&= 
+y_2^{T}M(\textbf{h}|\nu_1,a)y_2 + 
+y_1^{T}\rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\rho \frac{\sigma_1}{2\sigma_2} M(\textbf{h}|\nu_3,a)y_1 \\
+&=
+y_2^{T}M(\textbf{h}|\nu_1,a)y_2 + 
+\rho \frac{\sigma_1}{\sigma_2} y_1^{T}M(\textbf{h}|\nu_3,a)y_2 \\
+&=
+\frac{1}{\sigma^2_2} \Bigg[
+y^{T}_2 C_{22}( \textbf{h} | \nu_1,a) + y^{T}_1 C_{12}( \textbf{h}| \nu_3,a)\Bigg]y_2
+\end{aligned}
+\end{equation}
+
+
+## Caso em que $\theta_{k} = \rho$
+
+### Traço
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \rho} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  \textbf{\huge o } & \\
+  \sigma_1\sigma_2 M(\textbf{h} | \nu_3,a) & \textbf{\huge o }
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+  C_{12}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a)\\
+  C_{22}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\sigma_1\sigma_2 M(\textbf{h} | \nu_3,a)\\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \rho}\Bigg) &= 
+2\sigma_1\sigma_2tr\Bigg( 
+ C_{12}^{*}( \textbf{h} ) M(\textbf{h} | \nu_3,a)
+\Bigg)
+\end{aligned}
+\end{equation}
+
+### Forma Quadrática
+
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \textbf{\huge o } &  \\ 
+  \sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a) &  
+  \textbf{\huge o }
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_2 \\ 
+  \sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_1
+\end{pmatrix} \\
+&= 
+y_1^{T}\sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\sigma_1 \sigma_2 M(\textbf{h}|\nu_3,a)y_1 \\
+&=
+2\sigma_1 \sigma_2 y_1^{T}M(\textbf{h}|\nu_3,a)y_2
+\end{aligned}
+\end{equation}
+
+
+## Caso em que $\theta_{k} = a$
+
+### Traço
+
+\begin{equation}
+\begin{aligned}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a} &= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix}
+  \sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) & 
+  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a)\\
+  \rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) &
+  \sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{12}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) &
+  C_{11}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) + C_{12}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
+  C_{21}^{*}( \textbf{h} )\sigma^2_1 M^{'}(\textbf{h} |\nu_1,a) + C_{22}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) &
+  C_{21}^{*}( \textbf{h} )\rho\sigma_1\sigma_2M^{'}(\textbf{h} | \nu_3,a) + C_{22}^{*}( \textbf{h} )\sigma^2_2 M^{'}(\textbf{h} |\nu_2,a)\\
+\end{pmatrix}
+\end{aligned}
+\end{equation}
+
+Portanto como $C_{12}^{*}(\textbf{h}) = C_{21}^{*T}(\textbf{h})$
+
+\begin{equation}
+\begin{aligned}
+tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial a}\Bigg) = \text{ } 
+& \sigma^2_1 tr\Bigg(C_{11}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_1,a) \Bigg) + \\
+& \sigma^2_2 tr\Bigg(C_{22}^{*}(\textbf{h}) M^{'}(\textbf{h} |\nu_2,a) \Bigg) + \\
+& 2 \rho \sigma_2 \sigma_2 tr\Bigg(C_{12}^{*}(\textbf{h}) M^{'}(\textbf{h} | \nu_3,a) \Bigg)
+\end{aligned}
+\end{equation}
+
+Por outro lado, temos que 
+
+\begin{equation}
+\label{eq:matern_deriv}
+M^{'}(\textbf{h}|\nu,a) = \frac{\partial M(\textbf{h} | \nu ,a)}{ \partial a} = 
+\frac{(\frac{2}{a})^{1-\nu}d^{\nu}}{\Gamma(\nu)}
+  \Bigg[
+    2\nu K_{\nu}(ad) - ad K_{\nu + 1 }(ad)
+  \Bigg]
+\end{equation}
+
+em que $d := ||\textbf{h}||$.
+
+### Forma Quadrática
+
+\begin{equation}
+\begin{aligned}
+y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y 
+&= 
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \sigma^2_1 M^{'}(\textbf{h}|\nu_1,a) &  \\ 
+  \rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a) & 
+  \sigma^2_2M ^{'}(\textbf{h}|\nu_2,a)
+\end{pmatrix} 
+\begin{pmatrix} y_1 \\ y_2 \end{pmatrix} \\
+&=
+\begin{pmatrix}  y_1^T & y_2^T \end{pmatrix}
+\begin{pmatrix} 
+  \sigma^2_1 M^{'}(\textbf{h}|\nu_1,a)y_1 +
+  \rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_2\\ 
+  \rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_1 +
+  \sigma^2_2 M^{'}(\textbf{h}|\nu_2,a)y_2 
+\end{pmatrix} \\
+&= 
+y_1^{T}\sigma^2_1 M^{'}(\textbf{h}|\nu_1,a)y_1 +
+y_1^{T}\rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_2 +
+y_2^{T}\rho \sigma_1 \sigma_2 M^{'}(\textbf{h}|\nu_3,a)y_1 +
+y_2^{T}\sigma^2_2 M^{'}(\textbf{h}|\nu_2,a)y_2 \\
+&= 
+\sigma^2_1 y_1^{T} M^{'}(\textbf{h}|\nu_1,a)y_1 +
+\sigma^2_2 y_2^{T} M^{'}(\textbf{h}|\nu_2,a)y_2 +
+2\rho \sigma_1 \sigma_2  y_1^{T}M^{'}(\textbf{h}|\nu_3,a)y_2
+\end{aligned}
+\end{equation}
+  
