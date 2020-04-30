@@ -21,7 +21,7 @@ Neste documento estão presentes todas as contas feitas para a implementação d
 Para o modelo (Cressie)
 
 \begin{equation}
-\textbf{Y}^{*}(\textbf{s}) = \mu (\textbf{s}) + \eta(\textbf{s}) +  \epsilon(\textbf{s})
+Z^{*}(\textbf{s}) = \mu (\textbf{s}) + \eta(\textbf{s}) +  \epsilon(\textbf{s})
 \end{equation}
 
 temos que $\textbf{s} \in \mathbb{R}^2$ e que 
@@ -36,7 +36,7 @@ Agora adapta-se esta formulação para o cenário multivariado
 
 \begin{equation}
 \label{eq:mvt_cress}
-\textbf{Y}^{*}(\textbf{s}) = \boldsymbol \mu (\textbf{s}) + \boldsymbol \eta(\textbf{s}) + \boldsymbol \epsilon(\textbf{s})
+\textbf{Z}^{*}(\textbf{s}) = \boldsymbol \mu (\textbf{s}) + \boldsymbol \eta(\textbf{s}) + \boldsymbol \epsilon(\textbf{s})
 \end{equation}
 
 em que novamente $\textbf{s} \in \mathbb{R}^2$, e
@@ -47,31 +47,31 @@ em que novamente $\textbf{s} \in \mathbb{R}^2$, e
 
 - $\boldsymbol \epsilon(\textbf{s})$ é o vetor de variações em escala micro (não detectáveis na resolução (condicional) dos dados).
 
-de forma que o processo $\textbf{Y}$ é bivariado com a seguinte estrutura
+de forma que o processo $\textbf{Z}$ é bivariado com a seguinte estrutura
 
 \begin{equation}
-\label{eq:non_vec_Y}
-\textbf{Y}^{*}(\textbf{s}) = \begin{pmatrix}
-Y_{11}(\textbf{s}) & Y_{12}(\textbf{s}) \\
+\label{eq:non_vec_Z}
+\textbf{Z}^{*}(\textbf{s}) = \begin{pmatrix}
+Z_{11}(\textbf{s}) & Z_{12}(\textbf{s}) \\
 \vdots & \vdots \\
-Y_{N1}(\textbf{s}) & Y_{N2}(\textbf{s}) 
+Z_{N1}(\textbf{s}) & Z_{N2}(\textbf{s}) 
 \end{pmatrix}
 \end{equation}
 
-Neste ponto a estrateǵia é modelar as observações bivariadas do processo espacial por meio de uma Normal Bivariada. Ou seja, cada par de observações $\Big(Y_{i1}(\textbf{s}), Y_{i2}(\textbf{s})\Big)$ seria uma realização de $N_2(\boldsymbol \mu, \Sigma)$, indexada (de alguma maneira) no  espaço. Para isto é interessante reformular a equação (\ref{eq:non_vec_Y}) em termos da função Vec($\cdot$):
+Neste ponto a estrateǵia é modelar as observações bivariadas do processo espacial por meio de uma Normal Bivariada. Ou seja, cada par de observações $\Big(Z_{i1}(\textbf{s}), Z_{i2}(\textbf{s})\Big)$ seria uma realização de $N_2(\boldsymbol \mu, \Sigma)$, indexada (de alguma maneira) no  espaço. Para isto é interessante reformular a equação (\ref{eq:non_vec_Z}) em termos da função Vec($\cdot$):
 
 \begin{equation}
-\textbf{Y}(\textbf{s}) := Vec(\textbf{Y}^{*}(\textbf{s})) = 
+\textbf{Z}(\textbf{s}) := Vec(\textbf{Z}^{*}(\textbf{s})) = 
 \begin{pmatrix}
-Y_{11}(\textbf{s}) \\ 
-Y_{12}(\textbf{s}) \\
+Z_{11}(\textbf{s}) \\ 
+Z_{12}(\textbf{s}) \\
 \vdots \\ 
-Y_{N1}(\textbf{s}) \\
-Y_{N2}(\textbf{s}) 
+Z_{N1}(\textbf{s}) \\
+Z_{N2}(\textbf{s}) 
 \end{pmatrix}
 \end{equation}
 
-em que atribui-se ao processo $\textbf{Y}(\textbf{s})$ a distribuição Normal Multivariada com vetor de funções médias $\boldsymbol \mu^{T}(\textbf{s}) = (\mu_1(\textbf{s}),\mu_2(\textbf{s}))$ e função de covariância cruzada $\boldsymbol\Sigma (\textbf{h})$ com estrutura dada por
+em que atribui-se ao processo $\textbf{Z}(\textbf{s})$ a distribuição Normal Multivariada com vetor de funções médias $\boldsymbol \mu^{T}(\textbf{s}) = (\mu_1(\textbf{s}),\mu_2(\textbf{s}))$ e função de covariância cruzada $\boldsymbol\Sigma (\textbf{h})$ com estrutura dada por
 
 \begin{equation}
 \boldsymbol\Sigma (\textbf{h}) =
@@ -85,12 +85,12 @@ Assume-se também estacionariedade de segunda ordem para este processo, onde as 
 
 \begin{equation}
 \begin{aligned}
-&E(Y_{i1}^{*}(\textbf{s + h})) = E(Y_{i1}(\textbf{s})) = \mu_1\\
-&E(Y_{i2}^{*}(\textbf{s + h})) = E(Y_{i2}(\textbf{s})) = \mu_2\\
-&E(Y_{i2}^{*}(\textbf{s + h})Y_{i2}^{*}(\textbf{s})) = C_{11}(\textbf{||s-h||})\\
-&E(Y_{i1}^{*}(\textbf{s + h})Y_{i2}^{*}(\textbf{s})) = C_{22}(\textbf{||s-h||}) \\
-&E(Y_{i2}^{*}(\textbf{s + h})Y_{i1}^{*}(\textbf{s})) = C_{12}(\textbf{||s-h||}) \\
-&E(Y_{i1}^{*}(\textbf{s + h})Y_{i2}^{*}(\textbf{s})) = C_{21}(\textbf{||s-h||})
+&E(Z_{i1}^{*}(\textbf{s + h})) = E(Z_{i1}(\textbf{s})) = \mu_1\\
+&E(Z_{i2}^{*}(\textbf{s + h})) = E(Z_{i2}(\textbf{s})) = \mu_2\\
+&E(Z_{i2}^{*}(\textbf{s + h})Z_{i2}^{*}(\textbf{s})) = C_{11}(\textbf{||s-h||})\\
+&E(Z_{i1}^{*}(\textbf{s + h})Z_{i2}^{*}(\textbf{s})) = C_{22}(\textbf{||s-h||}) \\
+&E(Z_{i2}^{*}(\textbf{s + h})Z_{i1}^{*}(\textbf{s})) = C_{12}(\textbf{||s-h||}) \\
+&E(Z_{i1}^{*}(\textbf{s + h})Z_{i2}^{*}(\textbf{s})) = C_{21}(\textbf{||s-h||})
 \end{aligned}
 \end{equation}
 
@@ -431,7 +431,22 @@ $$
 
 # Estrutura de Blocos para Contas no Gradiente
 
-Aqui a idéia é mitigar o custo computacional de $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \theta_{k}}\Bigg) + y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y$ já que vão aparecer muitas matrizes nulas bem grandes em $\partial\Sigma / \partial \boldsymbol\theta_{k}$
+Aqui a idéia é mitigar o custo computacional de $tr\Bigg(\boldsymbol\Sigma^{-1}_{\boldsymbol\theta} (\textbf{h}) \frac{\partial\Sigma}{\partial \theta_{k}}\Bigg) + y^{T}\Bigg[ \frac{\partial\Sigma(\textbf{h})}{\partial \theta_k}\Bigg]y$.
+
+Primeiramente, como parte central das contas que virão, é importante citar que 
+
+\begin{equation}
+\boldsymbol\Sigma^{-1}_{\boldsymbol\theta}\textbf{x} =
+\begin{pmatrix}
+  C_{11}^{*}( \textbf{h} ) & C_{12}^{*}( \textbf{h} ) \\
+  C_{21}^{*}( \textbf{h} ) & C_{22}^{*}( \textbf{h} )
+\end{pmatrix}
+\begin{pmatrix} \textbf{x}_1 \\ \textbf{x}_2 \end{pmatrix} =
+\begin{pmatrix}
+C_{11}^{*}( \textbf{h} )\textbf{x}_1 + C_{12}^{*}( \textbf{h} )\textbf{x}_2 \\
+C_{21}^{*}( \textbf{h} )\textbf{x}_1 + C_{22}^{*}( \textbf{h} )\textbf{x}_2
+\end{pmatrix}
+\end{equation}
 
 ## Relembrar é viver: Produto de Matrizes
 
@@ -789,4 +804,5 @@ y_2^{T}\sigma^2_2 M^{'}(\textbf{h}|\nu_2,a)y_2 \\
 2\rho \sigma_1 \sigma_2  y_1^{T}M^{'}(\textbf{h}|\nu_3,a)y_2
 \end{aligned}
 \end{equation}
+  
   

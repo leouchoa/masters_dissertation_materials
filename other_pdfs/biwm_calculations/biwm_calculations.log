@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2019/dev/Debian) (preloaded format=pdflatex 2020.1.27)  5 APR 2020 14:14
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2019/dev/Debian) (preloaded format=pdflatex 2020.1.27)  21 APR 2020 18:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -659,17 +659,17 @@ File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 ) [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] [5] [6] [7]
-Overfull \hbox (33.2342pt too wide) detected at line 880
+Overfull \hbox (33.2342pt too wide) detected at line 894
 [][][]
  []
 
 [8]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 940.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 954.
 [9]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 940.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 954.
 (./biwm_calculations.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 940.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 940.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 954.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 954.
 Package rerunfilecheck Info: File `biwm_calculations.out' has not changed.
 (rerunfilecheck)             Checksum: 97224AD467F0914309571FDEB2D74326;5944.
 
@@ -677,11 +677,11 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 13037 strings out of 492615
- 190149 string characters out of 6131390
- 323021 words of memory out of 5000000
+ 13034 strings out of 492615
+ 190122 string characters out of 6131390
+ 324021 words of memory out of 5000000
  16599 multiletter control sequences out of 15000+600000
- 94422 words of font info for 101 fonts, out of 8000000 for 9000
+ 94256 words of font info for 99 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  35i,16n,38p,825b,362s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texmf/fonts/en
@@ -703,10 +703,10 @@ lic/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/
 texmf/fonts/type1/public/lm/lmsy5.pfb></usr/share/texmf/fonts/type1/public/lm/l
 msy7.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texlive/
 texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on biwm_calculations.pdf (9 pages, 308074 bytes).
+Output written on biwm_calculations.pdf (9 pages, 308152 bytes).
 PDF statistics:
- 374 PDF objects out of 1000 (max. 8388607)
- 336 compressed objects within 4 object streams
- 110 named destinations out of 1000 (max. 500000)
+ 375 PDF objects out of 1000 (max. 8388607)
+ 337 compressed objects within 4 object streams
+ 111 named destinations out of 1000 (max. 500000)
  12505 words of extra memory for PDF output out of 14400 (max. 10000000)
 
