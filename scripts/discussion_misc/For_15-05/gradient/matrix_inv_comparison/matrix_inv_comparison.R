@@ -9,6 +9,8 @@
 
 suppressPackageStartupMessages(library(BivMaternEstim))
 
+set.seed(123)
+
 distances <- dist(matrix(runif(30),ncol = 2))
 theta <- c(1.5,2,2,0.5)
 nu_vec <- c(0.5,0.5)
@@ -34,5 +36,7 @@ block_inv_test_matrix <- BivMaternEstim:::block_inv(test_matrix,
 inv_test_matrix_combined <- solve(test_matrix_combined)
 
 par(pty = "s",mfrow = c(1,2))
-image(block_inv_test_matrix,main = "block inverse")
-image(inv_test_matrix_combined,main = "R's solve")
+fields::image.plot(block_inv_test_matrix,main = "block inverse")
+fields::image.plot(inv_test_matrix_combined,main = "R's solve")
+
+fields::image.plot(block_inv_test_matrix - inv_test_matrix_combined)

@@ -18,7 +18,7 @@ sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix, combined = 
                                                            a = a,
                                                            nu = nus[3])
 
-  # ret <- matrices_assembler(M_1, M_2, M_12) #old
+  # ret <- matrices_assembler(M   _1, M_2, M_12) #old
   ret <- list(C_11 = M_1,C_22 = M_2,C_12 = M_12)
 
   if(combined){
