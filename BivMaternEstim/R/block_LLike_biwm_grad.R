@@ -37,8 +37,8 @@ block_LLike_biwm_grad <- function(theta,
   # ----- Grad of sigma^2_1 -----
   sigma_1_tr <-
     (
-      tr(autocov_matrix_inv$C_11_star %*% (autocov_matrix$C_11)) +
-        tr(autocov_matrix_inv$C_12_star %*% (autocov_matrix$C_12))
+      tr(autocov_matrix_inv$C_11_star %*% autocov_matrix$C_11) +
+        tr(autocov_matrix_inv$C_12_star %*% autocov_matrix$C_12)
     ) / sigmas[1]
 
   sigma_1_qf <-
@@ -46,7 +46,7 @@ block_LLike_biwm_grad <- function(theta,
                 (autocov_matrix$C_11 %*% y_1 +
                    autocov_matrix$C_12 %*% y_2))/ sigmas[1]
 
-  sigma_1_grad <- sigma_1_tr + sigma_1_qf
+  sigma_1_grad <- -0.5*(sigma_1_tr - sigma_1_qf)
 
 
   # ----- Grad of sigma^2_2 -----
@@ -63,7 +63,7 @@ block_LLike_biwm_grad <- function(theta,
       (t(y_2) %*% autocov_matrix$C_22 +
          t(y_1) %*% autocov_matrix$C_12) %*% y_2) / sigmas[2]
 
-  sigma_2_grad <- sigma_2_tr + sigma_2_qf
+  sigma_2_grad <- -0.5*(sigma_2_tr - sigma_2_qf)
 
 
   # ----- Grad of rho -----
@@ -81,7 +81,7 @@ block_LLike_biwm_grad <- function(theta,
     2*sqrt(sigmas[1]*sigmas[2]) *
       t(y_1) %*% M_nu_3 %*% y_2)
 
-  rho_grad <- rho_tr + rho_qf
+  rho_grad <- -0.5*(rho_tr - rho_qf)
 
   # ----- Grad of a -----
 
@@ -108,7 +108,7 @@ block_LLike_biwm_grad <- function(theta,
       sigmas[2] * t(y_2) %*% M_nu_2 %*% y_2 +
       2*rho*sqrt(sigmas[1]*sigmas[2])  * t(y_1) %*% M_nu_3 %*% y_2)
 
-  a_grad <- a_tr + a_qf
+  a_grad <- -0.5*(a_tr - a_qf)
 
 
     return(c(
