@@ -15,28 +15,20 @@ block_log_det <- function(matrix_list){
 }
 
 # --- Sanity Check ----
-
-# sourceDir <- function(path, trace = TRUE, ...) {
-#   for (nm in list.files(path, pattern = "[.][RrSsQq]$")) {
-#     if(trace) cat(nm,":")
-#     source(file.path(path, nm), ...)
-#     if(trace) cat("\n")
-#   }
-# }
 #
-# sourceDir(".")
-
+# library(fields)
 # source("sigma_assembler_biwm.R")
-# source("matrices_assembler.R")
 # source("matern_cov_wrapper.R")
 #
+# set.seed(123)
 # distances <- dist(matrix(runif(30),ncol = 2))
 # theta <- c(1.5,2,2,0.5)
 #
 # test_matrix <- sigma_assembler_biwm(theta[1:2],theta[3],theta[4],c(0.5,0.5),distances)
 #
-# log(det(matrices_assembler(M_1 = test_matrix$C_11,M_2 = test_matrix$C_22, M_12 = test_matrix$C_12)))
+# test_matrix_combined <- sigma_assembler_biwm(theta[1:2],theta[3],theta[4],c(0.5,0.5),distances,combined = TRUE)
 #
-# block_log_det(test_matrix)
+# results_new_way <- block_log_det(test_matrix)
+# results_old_way <- log(det(test_matrix_combined))
 #
-# ok good
+# round(results_new_way - results_old_way,10)
