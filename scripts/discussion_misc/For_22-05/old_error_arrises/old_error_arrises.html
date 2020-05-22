@@ -11,7 +11,7 @@
 
 <meta name="author" content="leonardo" />
 
-<meta name="date" content="2020-05-21" />
+<meta name="date" content="2020-05-22" />
 
 <title>old_error_arrises.R</title>
 
@@ -365,12 +365,12 @@ summary {
 
 <h1 class="title toc-ignore">old_error_arrises.R</h1>
 <h4 class="author">leonardo</h4>
-<h4 class="date">2020-05-21</h4>
+<h4 class="date">2020-05-22</h4>
 
 </div>
 
 
-<p>Guilherme este serve para ajudar a entender o problema principal do momento. A ideia é simular um simular um PG pelo RandomFields com RMbiwm em que <span class="math inline">\(\sigma^2_1 = 1, \sigma^2_2 = 1.5, a = 1, \rho = 0.7, \nu_1 = \nu_2 = 1\)</span>.</p>
+<p>Guilherme este código/documento serve para ajudar a entender o problema principal do momento. A ideia é simular um simular um PG pelo <code>RandomFields</code> com RMbiwm em que <span class="math inline">\(\sigma^2_1 = 1, \sigma^2_2 = 1.5, a = 1, \rho = 0.7, \nu_1 = \nu_2 = 1\)</span>.</p>
 <p>É importante citar também que <span class="math inline">\(\nu_{red}\)</span> é dado por <span class="math inline">\(ν_{12} =ν_{21} = 0.5 (ν_{11} + ν_{22}) * ν_{red}\)</span> e então para que tenhamos o modelo reduzido é preciso que <span class="math inline">\(ν_{red} = 1\)</span>.</p>
 <pre class="r"><code>suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(BivMaternEstim))
@@ -423,7 +423,7 @@ theta_start &lt;- c(1.5,3,4,0.5)
 <div id="o-que-eu-já-tentei" class="section level1">
 <h1>O que eu já tentei</h1>
 <ol style="list-style-type: decimal">
-<li>Conferir as inversas calculada por blocos e com o <code>solve</code> e o resultado é que elas são quase iguais. Dentro da <code>debugonce(LLike_biwm)</code> eu fiz</li>
+<li>Conferir as inversas calculada por blocos e com o <code>solve</code>: o resultado é que elas são quase iguais. Pra checar isso, dentro da <code>debugonce(LLike_biwm)</code> eu fiz</li>
 </ol>
 <ul>
 <li><code>autocov_test &lt;- sigma_assembler_biwm(sigmas = sigmas,a = as,rho = rho,nus = nus,coords_matrix = coords_matrix,combined = TRUE)</code></li>
@@ -431,12 +431,15 @@ theta_start &lt;- c(1.5,3,4,0.5)
 <li><code>image(autocov_test_inv - block_inv(autocov_matrix,combined = TRUE))</code></li>
 </ul>
 <ol start="2" style="list-style-type: decimal">
-<li>Comparar o <span class="math inline">\(\log(|\boldsymbol\Sigma_{\boldsymbol \theta}|)\)</span> por blocos usando <code>block_log_det()</code> e com <code>log(det())</code>. O resultado foi que elas dão o mesmo resultado. Pra chegar nessa conclusão eu aproveitei as matrizes que foram criadas no tópico 1. dentro de <code>debugonce(LLike_biwm)</code> e fiz</li>
+<li>Comparar o <span class="math inline">\(\log(|\boldsymbol\Sigma_{\boldsymbol \theta}|)\)</span> por blocos usando <code>block_log_det()</code> e <code>log(det())</code>. O resultado foi que elas dão o mesmo resultado. Pra chegar nessa conclusão eu aproveitei as matrizes que foram criadas no tópico 1. dentro de <code>debugonce(LLike_biwm)</code> e fiz</li>
 </ol>
 <ul>
 <li><code>round(block_log_det(autocov_matrix) - log(det(autocov_test)), 10)</code></li>
 </ul>
-<p>Na terceira vez que usei <code>debugonce(Llike_biwm)</code> o log do determinante explodiu pra <code>-Inf</code> tanto por <code>block_log_det(autocov_matrix)</code> como por <code>log(det(autocov_test))</code>.</p>
+<p>Na terceira vez que usei <code>debugonce(Llike_biwm)</code> o log do determinante explodiu pra <code>-Inf</code> tanto por <code>block_log_det(autocov_matrix)</code> como por <code>log(det(autocov_test))</code>. Em seguida eu tentei</p>
+<ul>
+<li>Usar <code>debugonce(block_log_det)</code> para descobrir se possivelmente alguma das matrizes era a responsável pelo problema. Verifiquei que na verdade as <strong>duas</strong> têm seu determinante nulo (ver o pdf “block_log_det_matrices_image”). Talvez na verdade essas matrizes realmente são singular e é preciso verificar mais restrições (que devem estar no artigo) pra deixar ela pd.</li>
+</ul>
 <ol start="3" style="list-style-type: decimal">
 <li>Acompanhar o gradiente da função nas iterações com <code>debugonce(BivMaternEstim:::block_LLike_biwm_grad)</code>. Na segunda iteração o gradiente não havia explodido. Nestas duas corridas ambos os gradientes de <span class="math inline">\(\sigma^2_1\)</span> e <span class="math inline">\(\sigma^2_2\)</span> concordavam em sinal e na ordem de magnitude.</li>
 </ol>

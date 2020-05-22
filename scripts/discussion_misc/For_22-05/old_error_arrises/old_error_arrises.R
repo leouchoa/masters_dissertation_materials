@@ -1,4 +1,4 @@
-#' Guilherme este serve para ajudar a entender o problema principal do momento. A ideia é simular um simular um PG pelo RandomFields com RMbiwm em que $\sigma^2_1 = 1, \sigma^2_2 = 1.5, a = 1, \rho = 0.7, \nu_1 = \nu_2 = 1$. 
+#' Guilherme este código/documento serve para ajudar a entender o problema principal do momento. A ideia é simular um simular um PG pelo `RandomFields` com RMbiwm em que $\sigma^2_1 = 1, \sigma^2_2 = 1.5, a = 1, \rho = 0.7, \nu_1 = \nu_2 = 1$. 
 #' 
 #' É importante citar também que $\nu_{red}$ é dado por $ν_{12} =ν_{21} = 0.5 (ν_{11} + ν_{22}) * ν_{red}$ e então para que tenhamos o modelo reduzido é preciso que $ν_{red} = 1$.
 #' 
@@ -57,7 +57,7 @@ theta_start <- c(1.5,3,4,0.5)
 #' 
 #' # O que eu já tentei
 #' 
-#' 1. Conferir as inversas calculada por blocos e com o `solve` e o resultado é que elas são quase iguais. Dentro da `debugonce(LLike_biwm)` eu fiz
+#' 1. Conferir as inversas calculada por blocos e com o `solve`: o resultado é que elas são quase iguais. Pra checar isso, dentro da `debugonce(LLike_biwm)` eu fiz
 #' 
 #' - `autocov_test <- sigma_assembler_biwm(sigmas = sigmas,a = as,rho = rho,nus = nus,coords_matrix = coords_matrix,combined = TRUE)`
 #' - `autocov_test_inv <- solve(autocov_test)`
@@ -65,11 +65,13 @@ theta_start <- c(1.5,3,4,0.5)
 #' 
 #' 
 #' 
-#' 2. Comparar o $\log(|\boldsymbol\Sigma_{\boldsymbol \theta}|)$ por blocos usando `block_log_det()` e com `log(det())`. O resultado foi que elas dão o mesmo resultado. Pra chegar nessa conclusão eu aproveitei as matrizes que foram criadas no tópico 1. dentro de `debugonce(LLike_biwm)` e fiz
+#' 2. Comparar o $\log(|\boldsymbol\Sigma_{\boldsymbol \theta}|)$ por blocos usando `block_log_det()` e `log(det())`. O resultado foi que elas dão o mesmo resultado. Pra chegar nessa conclusão eu aproveitei as matrizes que foram criadas no tópico 1. dentro de `debugonce(LLike_biwm)` e fiz
 #' 
 #' - `round(block_log_det(autocov_matrix) - log(det(autocov_test)), 10)`
 #' 
-#' Na terceira vez que usei `debugonce(Llike_biwm)` o log do determinante explodiu pra `-Inf` tanto por `block_log_det(autocov_matrix)` como por `log(det(autocov_test))`.
+#' Na terceira vez que usei `debugonce(Llike_biwm)` o log do determinante explodiu pra `-Inf` tanto por `block_log_det(autocov_matrix)` como por `log(det(autocov_test))`. Em seguida eu tentei
+#' 
+#' - Usar `debugonce(block_log_det)` para descobrir se possivelmente alguma das matrizes era a responsável pelo problema. Verifiquei que na verdade as **duas** têm seu determinante nulo (ver o pdf "block_log_det_matrices_image"). Talvez na verdade essas matrizes realmente são singular e é preciso verificar mais restrições (que devem estar no artigo) pra deixar ela pd.
 #' 
 #' 
 #' 
