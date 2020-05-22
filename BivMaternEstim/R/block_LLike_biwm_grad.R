@@ -85,28 +85,20 @@ block_LLike_biwm_grad <- function(theta,
 
   # ----- Grad of a -----
 
-  M_nu_1 <- matern_cov_wrapper(coords_dist = dist(coords_matrix),
-                               a = as[1],
-                               nu = nus[1])
+  M_dash_nu_1 <- matern_deriv(a = as[1], nu = nus[1], coords_matrix = coords_matrix)
 
-  M_nu_2 <- matern_cov_wrapper(coords_dist = dist(coords_matrix),
-                               a = as[2],
-                               nu = nus[2])
+  M_dash_nu_2 <- matern_deriv(a = as[2], nu = nus[2], coords_matrix = coords_matrix)
 
-  a_tr <- sigmas[1] * tr(
-    autocov_matrix_inv$C_11_star %*%
-      matern_deriv(a = as[1],nu = nus[1],coords_matrix = coords_matrix)) +
-    sigmas[2] * tr(
-      autocov_matrix_inv$C_22_star %*%
-        matern_deriv(a = as[2],nu = nus[2],coords_matrix = coords_matrix)) +
-    2*rho*sqrt(sigmas[1]*sigmas[2]) * tr(
-      autocov_matrix_inv$C_12_star %*%
-        matern_deriv(a = as[3],nu = nus[3],coords_matrix = coords_matrix))
+  M_dash_nu_3 <- matern_deriv(a = as[3], nu = nus[3], coords_matrix = coords_matrix)
+
+  a_tr <- sigmas[1] * tr(autocov_matrix_inv$C_11_star %*% M_dash_nu_1) +
+    sigmas[2] * tr(autocov_matrix_inv$C_22_star %*% M_dash_nu_2) +
+    2*rho*sqrt(sigmas[1]*sigmas[2]) * tr(autocov_matrix_inv$C_12_star %*% M_dash_nu_3)
 
   a_qf <- as.double(
-    sigmas[1] * t(y_1) %*% M_nu_1 %*% y_1 +
-      sigmas[2] * t(y_2) %*% M_nu_2 %*% y_2 +
-      2*rho*sqrt(sigmas[1]*sigmas[2])  * t(y_1) %*% M_nu_3 %*% y_2)
+    sigmas[1] * t(y_1) %*% M_dash_nu_1 %*% y_1 +
+      sigmas[2] * t(y_2) %*% M_dash_nu_2 %*% y_2 +
+      2*rho*sqrt(sigmas[1]*sigmas[2])  * t(y_1) %*% M_dash_nu_3 %*% y_2)
 
   a_grad <- -0.5*(a_tr - a_qf)
 
