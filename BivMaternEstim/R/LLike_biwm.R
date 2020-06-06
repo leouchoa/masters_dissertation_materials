@@ -37,8 +37,8 @@ LLike_biwm <- function(theta,
     -0.5 * (
       block_log_det(autocov_matrix) +
         t(Z[,1]) %*% autocov_matrix_inv[[1]] %*% as.matrix(Z[,1]) +
-        2 * t(Z[,1]) %*% autocov_matrix_inv[[2]] %*% as.matrix(Z[,1]) +
-        t(Z[,2]) %*% autocov_matrix_inv[[3]] %*% as.matrix(Z[,1]) +
+        2 * t(Z[,1]) %*% autocov_matrix_inv[[2]] %*% as.matrix(Z[,2]) +
+        t(Z[,2]) %*% autocov_matrix_inv[[3]] %*% as.matrix(Z[,2]) +
         length(obs_matrix) * log(2*pi)
     ))
 

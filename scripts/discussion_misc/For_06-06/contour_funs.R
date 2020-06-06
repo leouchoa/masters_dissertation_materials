@@ -14,16 +14,16 @@
 #'
 #' nus_vec <- c(0.5,0.5)
 
-eval_llike <- function(theta_vec){
+eval_llike <- function(theta_vec,log_cd){
 
-  S <- sigma_assembler_biwm(sigmas = theta_vec[1:2],
-                            a = theta_vec[3],
-                            rho = theta_vec[4],
-                            nus = nus_vec,
-                            coords_matrix = coords,
-                            combined = TRUE)
+  # S <- sigma_assembler_biwm(sigmas = theta_vec[1:2],
+  #                           a = theta_vec[3],
+  #                           rho = theta_vec[4],
+  #                           nus = nus_vec,
+  #                           coords_matrix = coords,
+  #                           combined = TRUE)
 
-  log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
+  # log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 
   LLike_biwm(theta = theta_vec,
              nus = nus_vec,
@@ -33,7 +33,7 @@ eval_llike <- function(theta_vec){
 
 }
 
-plot_llike_contour <- function(var_1,var_2,grid_df){
+plot_llike_contour <- function(var_1,var_2,grid_df,obs){
 
 
   eval_llike_results <- rep(0,nrow(grid_df))
@@ -41,12 +41,14 @@ plot_llike_contour <- function(var_1,var_2,grid_df){
   for(i in 1:nrow(grid_df)){
 
     eval_llike_results[i] <- eval_llike(
-      as.matrix(grid_df[i,]))
+      as.matrix(grid_df[i,]),log_cd = obs)
 
   }
 
-  ggplot(grid_df,
-         aes_string(var_1, var_2, z = eval_llike_results)) + geom_contour()
+  # ggplot(grid_df,
+  #        aes_string(var_1, var_2, z = eval_llike_results)) + geom_contour()
+  
+  contour(unique(grid_df[,var_1]),unique(grid_df$grid_df[,var_2]),matrix(eval_llike_results,ncol = 15))
 
 }
 
