@@ -33,7 +33,7 @@ eval_llike <- function(theta_vec,log_cd){
 
 }
 
-plot_llike_contour <- function(var_1,var_2,grid_df,obs){
+plot_llike_contour <- function(var_1,var_2,grid_df,obs,true_param = NULL, n_bins = 30){
 
 
   eval_llike_results <- rep(0,nrow(grid_df))
@@ -48,10 +48,46 @@ plot_llike_contour <- function(var_1,var_2,grid_df,obs){
   # ggplot(grid_df,
   #        aes_string(var_1, var_2, z = eval_llike_results)) + geom_contour()
   
-  contour(unique(grid_df[,var_1]),unique(grid_df$[,var_2]),matrix(eval_llike_results,ncol = 15))
+  contour(
+    unique(grid_df[,var_1]),
+    unique(grid_df[,var_2]),
+    matrix(eval_llike_results,ncol = 15),
+    nlevels = n_bins,
+    xlab = var_1,
+    ylab = var_2,
+    main = "Contornos da Log-Verossimilhança")
+  
+  if( !is.null(true_param) ){
+    points(true_param[1],true_param[2],pch = 8)
+  }
 
 }
 
+
+plot_llike_contour_ggplot <- function(var_1,var_2,grid_df,obs,bins = NULL){
+  
+  
+  eval_llike_results <- rep(0,nrow(grid_df))
+  
+  for(i in 1:nrow(grid_df)){
+    
+    eval_llike_results[i] <- eval_llike(
+      as.matrix(grid_df[i,]),log_cd = obs)
+    
+  }
+  
+  ggplot(grid_df,
+         aes_string(var_1, var_2, 
+                    z = eval_llike_results)
+         ) + 
+    geom_contour(colour='black',bins = bins) +
+    geom_dl(
+      aes(label=..level..),
+      method="bottom.pieces", 
+      stat="contour"
+    )
+  
+}
 
 construct_grid <- function(sigma2_1_vec,
                            sigma2_2_vec,
