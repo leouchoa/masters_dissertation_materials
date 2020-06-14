@@ -17,7 +17,7 @@ set.seed(123)
 cov_struct <- RMbiwm(nudiag=c(1, 1), nured=1, rhored=0.4, cdiag=c(1, 1.5),s=c(1, 1, 1))
 
 x_grid <- seq(-2, 2, 0.1)
-load("gp_and_idx.rda")
+load("../../For_29-05/gradient_problem/gp_and_idx.rda")
 # gp <- RFsimulate(cov_struct, x_grid, x_grid)
 
 # plot_rf_biwm(as.data.frame(gp),x_grid,x_grid)
@@ -37,7 +37,7 @@ true_theta <- c(1,1.5,1,0.4)
 
 theta_start_all_above <- c(1.5,3,4,0.7)
 
-theta_start_all_below <- c(0.3,0.9,0.2,0.1)
+theta_start_all_bellow <- c(0.3,0.9,0.2,0.1)
 
 theta_start_all_mixed_1 <- c(1.5,0.2,4,-0.3)
 
@@ -53,22 +53,32 @@ theta_start_all_mixed_1 <- c(1.5,0.2,4,-0.3)
 #'
 #' # Idéia do que eu tentei
 #' 
-#' Considerar os casos em que os valores iniciais estão todos acima do verdadeiro (`theta_start_all_above`), abaixo do verdadeiro (`theta_start_all_below`) ou misturados (`theta_start_all_mixed_1`). Com isso acompanhar $\theta$ e seu gradiente para tentar explicar o motivo do algorítmo estar com erro.
+#' 
+#' 
+#' Considerar os casos em que os valores iniciais estão todos acima do verdadeiro (`theta_start_all_above`), abaixo do verdadeiro (`theta_start_all_bellow`) ou misturados (`theta_start_all_mixed_1`). Com isso acompanhar $\theta$ e seu gradiente para tentar explicar o motivo do algorítmo estar com erro.
+#' 
 #' 
 #' 
 #' # Resumo
 #' 
-#' Fudeu cara. Essa porra tá toda doida.
+#' Não parece que a situação mudou muito depois da última reunião (06-06-2020), apesar do gráfico de contorno indicar que agora estamos otimizando a verossimilhança "correta".
 #' 
 #' ## Caso Todos acima
 #' 
 #' **Conclusão**:
 #' 
-#' 1. Para $\sigma^2_1,\sigma^2_2,a$ a direção está correta. Mas para $\rho$ a direção está errada daí o algorítmo bate na fronteira e caga tudo.
+#' 1. Me parece que o caso problemático aqui é o $\rho$ (fronteiras dele são +/- 1). Ele começou na direção errada e não mudou. Porém os outros também foram na direção da fronteira e não voltaram. Não dá pra afirmar que $\rho$ é o único problema.
 #' 
-#' 2. Outro fato curioso é que para $\sigma^2_1$ valor do gradiente mal muda, indo de -12.20152 para -13.92903. Porém o valor de $\theta$ calculado pelo otimizador tem uma discrepância muito grande na terceira iteração: primeiro salto foi de 3 para 2.42626 enquanto que o segundo foi de 2.42626 para 0.13129. Este fato acontece também para $\sigma^2_1$ e $a$.
+#' Entretanto ele é bem problemático. Veja isto com o comando `res_test <- fit_biwm(obs_matrix = obs_val_subset,coords_matrix = obs_val_subset,theta0 = c(theta_start_all_above[1:3],-0.2),nus = rep(1,2))`
+#' 
+#' 
+#' 
 #' 
 #' **Resultado do otimizador:**
+#' 
+#' Comando usado: `res_all_above <- fit_biwm(obs_matrix = obs_val_subset,coords_matrix = obs_val_subset,theta0 = theta_start_all_above,nus = rep(1,2))`
+#' 
+#' 
 #' 
 #' theta  1.5 3 4 0.7 
 #' 
@@ -80,16 +90,22 @@ theta_start_all_mixed_1 <- c(1.5,0.2,4,-0.3)
 #' 
 #' theta  0.06612 0.13129 0.17473 0.98601 
 #' 
+#' Error in optim(theta0, fn = LLike_biwm, gr = block_LLike_biwm_grad, method = "L-BFGS-B",  : 
+#'                  L-BFGS-B needs finite values of 'fn'
+#' 
 #' 
 #' ## Caso Todos Abaixo
 #' 
 #' **Conclusão:**
 #' 
-#' 1. Aqui parece que há um enorme viés na direção de descida, caso esteja não seja um caso patológico. Só $\rho tem a direção correta$. Comparar com o caso "Tudo Acima"
+#' 1. Eles começam na direção e talvez isso seja fatal. Aqui o problema é o parâmetro $a$: por ser muito grande ele é o responsável por chegar à fronteira primeiro. Isto pode ser conferido com o comando `res_all_bellow <- fit_biwm(obs_matrix = obs_val_subset,coords_matrix = obs_val_subset,theta0 = c(theta_start_all_below[1:3],-0.2),nus = rep(1,2))`
 #' 
-#' 2. A magnitude aqui de $a_{grad}$ é muito grande.
+#' 2. Notar que a direção inicial foi exatamente a mesma do caso anterior
 #' 
 #' **Resultado do otimizador:**
+#' 
+#' Comando usado: `res_all_bellow <- fit_biwm(obs_matrix = obs_val_subset,coords_matrix = obs_val_subset,theta0 = theta_start_all_bellow,nus = rep(1,2))`
+#' 
 #' 
 #' theta  0.3 0.9 0.2 0.1 
 #' 
@@ -97,23 +113,33 @@ theta_start_all_mixed_1 <- c(1.5,0.2,4,-0.3)
 #' 
 #' theta  0.07368 0.21953 0.04937 0.78047 
 #' 
+#' Error in optim(theta0, fn = LLike_biwm, gr = block_LLike_biwm_grad, method = "L-BFGS-B",  : 
+#'                  L-BFGS-B needs finite values of 'fn'
+#' 
+#' 
 #' 
 #' ## Caso Tudo Misturado
 #' 
 #' **Conclusão:**
 #' 
-#' 1. Para $\sigma^2_1$ o algorítmo acerta a direção, mas $\theta$ não anda.
+#' 1. Curiosamente aqui ele acerta as direções e os primeiros passos são bons, mas depois ele volta pra onde estava e não anda pra lugar algum.
 #' 
-#' 2. Para $\sigma^2_2$ o algorítmo começa na direção correta, mas muda de direção na segunda iteração e só corrige o erro na quarta iteração. Ele mantém a direção correta mas $\theta$ não anda pra lugar algum.
+#' 2. Outro fato interessante é que o valor do gradiente não está muito longe daqueles encontrados nos outros testes. Mas aqui a atualização não ocorre, enquanto que nos outros casos eles vão pra fronteira muito rapidamente.
 #' 
-#' 3. Para $a$ a direção está correta mas não anda.
+#' 3. 
 #' 
-#' 4. Para $\rho$ a direção começa certo e só está errada na segunda iteração. Porém $\theta$ não anda.
+#' 4. 
+#' 
+#' 
+#' Comando usado: `res_all_mixed <- fit_biwm(obs_matrix = obs_val_subset,coords_matrix = obs_val_subset,theta0 = theta_start_all_mixed_1,nus = rep(1,2))`
+#' 
+#' 
+#' `r knitr::kable(as.table(rbind(true_theta,theta_start = theta_start_all_mixed_1,theta_hat = theta_start_all_mixed_1)))`
 #' 
 #' **Resultados das primeiras iterações:**
 #' 
 #' theta  1.5 0.2 4 -0.3 
-#'
+#' 
 #' gradient  -26.71931 290.6845 -54.36438 41.90233 
 #' 
 #' theta  1.49484 1.19988 3.98624 -0.29553 
@@ -134,9 +160,8 @@ theta_start_all_mixed_1 <- c(1.5,0.2,4,-0.3)
 #' 
 #' theta  1.49999 0.2013 3.99998 -0.29999 
 #' 
-#' gradient  -26.71849 285.3268 -54.21229 41.44995 
+#' gradient  -26.71849 285.3268 -54.21229 41.44995
 #' 
-#' theta  1.5 0.20019 4 -0.3 
 #' 
 #' **Duas últimas iterações**
 #' 
@@ -147,6 +172,11 @@ theta_start_all_mixed_1 <- c(1.5,0.2,4,-0.3)
 #' theta  1.5 0.2 4 -0.3 
 #' 
 #' gradient  -26.71931 290.6845 -54.36438 41.90233 
+#' 
+#' theta  1.5 0.2 4 -0.3 
+#' 
+#' gradient  -26.71931 290.6845 -54.36438 41.90233 
+#' 
 #' 
 #' **O algorítmo "convergiu" para (1.5,0.2,4.0,-0.3).**
 #' 
