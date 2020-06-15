@@ -1,0 +1,707 @@
+---
+title: |
+  | ME524 -- Computação Aplicada à Estatística 
+  | Aula 15: *Line search* e escore de Fisher. 
+author: "Guilherme Ludwig"
+date: ""
+output: beamer_presentation
+bibliography: references.bib
+biblio-style: apalike
+classoption: aspectratio=169
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", out.height = "7cm")
+options(width=60)
+# No futuro: norma do gradiente tem q tirar raiz!!
+# line search pode ser > 1
+```
+
+## Retomando problemas de otimização
+
+* As derivadas matriciais vão ser muito úteis quando considerarmos métodos como o algoritmo EM (aulas futuras).
+
+* Também temos um controle mais fino de problemas de otimização. Em particular, vamos olhar alguns exemplos hoje como regressão logística.
+
+* Otimização é um curso bastante complexo, com problemas de otimização linear, otimização convexa... nós vamos examinar alguns casos comuns da estatística, mas recomendo fortemente que vocês façam matérias relacionadas na matemática aplicada e ciência da computação.
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+Retomando o exemplo da Aula 13, se $X_1, X_2, \ldots, X_n$ são uma amostra aleatória de $X \sim \Gamma(\alpha, \lambda),$ então a log-verossimilhança é \[\ell(\alpha, \lambda|\text{data}) = n\alpha\log(\lambda) - n\log(\Gamma(\alpha)) -\lambda n\bar{x} + (\alpha-1)\sum_{i=1}^n \log(x_i).\] O gradiente e Hessiano são \[\nabla \ell(\alpha, \lambda) = \begin{pmatrix} n\log(\lambda) - \dfrac{n\Gamma'(\alpha)}{\Gamma(\alpha)} + \displaystyle\sum_{i=1}^n \log(x_i) \\ \dfrac{n\alpha}{\lambda} - n\bar{x} \end{pmatrix}, \mathbf{H}_\ell = \begin{pmatrix} -n\dfrac{\Gamma''(\alpha)\Gamma(\alpha) - [\Gamma'(\alpha)]^2}{[\Gamma(\alpha)]^2} & \dfrac{n}{\lambda} \\ \dfrac{n}{\lambda} & -\dfrac{n\alpha}{\lambda^2} \end{pmatrix} \]
+
+Lembre-se que o `R` possui as derivadas $\frac{\mathrm{d}}{\mathrm{d} \alpha} \log(\Gamma(\alpha))$ e $\frac{\mathrm{d}^2}{\mathrm{d} \alpha^2} \log(\Gamma(\alpha))$ implementadas nas funções `digamma` e `trigamma`.
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+Considere dados que correspondem ao volume de neve em março, registrado em Minneapolis, durante um período de 30 anos [disponível em @devore2011probability, pg. 188]:
+
+```{r echo=FALSE}
+snow <- c(0.77, 1.2, 3, 1.62, 2.81, 2.48, 1.74, 0.47, 3.09, 1.31, 1.87, 
+0.96, 0.81, 1.43, 1.51, 0.32, 1.18, 1.89, 1.2, 3.37, 2.1, 0.59, 
+1.35, 0.9, 1.95, 2.2, 0.52, 0.81, 4.75, 2.05)
+snow
+```
+
+O histograma dos dados revela uma densidade aproximadamente Gamma.
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+```{r echo=FALSE}
+hist(snow, main = expression("Histograma da neve"), freq = FALSE, ylim = c(0,0.5)); rug(snow)
+```
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+```{r echo = FALSE}
+l <- function(alpha, lambda, x = snow){
+  n <- length(x)
+  n*alpha*log(lambda) - n*log(gamma(alpha)) - lambda*sum(x) + (alpha-1)*sum(log(x))
+}
+param <- expand.grid(alpha = seq(0.1, 10, l = 100), lambda = seq(0.1, 6, l = 100))
+# first = faster, então linha = alpha, coluna  = lambda
+L <- matrix(l(param[,1], param[,2]), ncol = 100)
+contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100),
+        xlab = expression(alpha), ylab = expression(lambda),
+        levels = c(-500, -400, -300, -200, -100, -50, -40, 0),
+        z = L, main  = "Função de log-verossimilhança")
+```
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+Implementando o gradiente e Hessiano: 
+
+```{r}
+gr <- function(alpha, lambda, x = snow){
+  n <- length(x)
+  return(matrix(c(n*log(lambda) - n*digamma(alpha) + sum(log(x)),
+                  n*alpha/lambda - sum(x)),
+                ncol = 1))
+}
+hess <- function(alpha, lambda, x = snow){
+  n <- length(x)
+  return(matrix(c(-n*trigamma(alpha),
+                  n/lambda, n/lambda,
+                  -n*alpha/(lambda^2)),
+                ncol = 2))
+}
+```
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+Veja que o algoritmo caminha na direção de um ponto crítico: \[\boldsymbol\theta_k = \boldsymbol\theta_{k-1} - \left[\mathbf{H}_\ell(\boldsymbol\theta_{k-1})\right]^{-1}\nabla \ell(\boldsymbol\theta_{k-1}),\] onde aqui \[\boldsymbol\theta_k = \begin{pmatrix}\alpha_k \\ \lambda_k\end{pmatrix},\] vai buscar algum ponto qualquer tal que $\nabla \ell(\boldsymbol\theta_{k-1}) = 0.$ Pode ser máximo, mínimo e até mesmo ponto de sela. Além disso, vimos que dependendo do ponto inicial, o otimizador diverge.
+
+Na figura a seguir, colori em vermelho as setas tais que algum componente de $\boldsymbol\theta_k$ seja negativo saindo de $\boldsymbol\theta_{k-1}.$ As setas estão todas reduzidas para $1\%$ do seu tamanho original.
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+```{r echo = FALSE}
+grgrid <- expand.grid(alpha = seq(1, 8, l = 20), lambda = seq(1, 5, l = 20))
+gress <- function(alpha, lambda){
+  n <- length(alpha)
+  ret <- matrix(0, nrow = n, ncol = 2)
+  for(i in 1:n){
+    ret[i,] <- -1*solve(hess(alpha[i], lambda[i]), gr(alpha[i], lambda[i]))
+  }
+  return(ret)
+}
+endarr <- gress(grgrid[,1], grgrid[,2])
+contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100),
+        xlab = expression(alpha), ylab = expression(lambda),
+        levels = c(-500, -400, -300, -200, -100, -50, -40, 0),
+        z = L, main  = "Função de log-verossimilhança")
+arrows(x0 = grgrid[,1], y0 = grgrid[,2],
+       x1 = grgrid[,1] + 0.01*endarr[,1], y1 = grgrid[,2] + 0.01*endarr[,2],
+       length = 0.05, lwd = 2, 
+       col = ifelse(grgrid[,1] + endarr[,1] < 0 | grgrid[,2] + endarr[,2] < 0, "Red", "Blue"))
+```
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+Na aula 13, vimos que um chute inicial de $\alpha_0 = 4, \lambda_0 = 2$ converge em aproximadamente 3 iterações, onde "convergir" significa $\|\nabla\ell(\boldsymbol\theta_3)\| < 0.1$ (aqui na aula passada eu disse 0.01, mas tinha esquecido de tirar a raiz! Equivalente $\|\nabla\ell(\boldsymbol\theta_3)\|^2 < 0.01$).
+
+Porém, para $\alpha_0 = 5, \lambda_0 = 2,$ o primeiro passo já caia fora do espaço paramétrico, e não temos convergência.
+
+Vamos falar brevemente sobre algoritmos com barreiras na próxima aula; por enquanto, vamos apenas considerar o problema de busca de soluções adequadas. Note que podemos modificar o algoritmo com um $\gamma \in (0,1],$ e atualizarmos \[\boldsymbol\theta_k = \boldsymbol\theta_{k-1} - \gamma\left[\mathbf{H}_\ell(\boldsymbol\theta_{k-1})\right]^{-1}\nabla \ell(\boldsymbol\theta_{k-1}).\]
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- x0 <- matrix(c(4,2), ncol = 1) -->
+<!-- x1 <- x0 - 0.5*solve(hess(x0[1,], x0[2,]), gr(x0[1,], x0[2,])) -->
+<!-- x2 <- x1 - 0.5*solve(hess(x1[1,], x1[2,]), gr(x1[1,], x1[2,])) -->
+<!-- x3 <- x2 - 0.5*solve(hess(x2[1,], x2[2,]), gr(x2[1,], x2[2,])) -->
+<!-- x4 <- x3 - 0.5*solve(hess(x3[1,], x3[2,]), gr(x3[1,], x3[2,])) -->
+<!-- x5 <- x4 - 0.5*solve(hess(x4[1,], x4[2,]), gr(x4[1,], x4[2,])) -->
+<!-- x6 <- x5 - 0.5*solve(hess(x5[1,], x5[2,]), gr(x5[1,], x5[2,])) -->
+<!-- x7 <- x6 - 0.5*solve(hess(x6[1,], x6[2,]), gr(x6[1,], x6[2,])) -->
+
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- arrows(x0[1,],x0[2,], x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 1. |gr| = ", round(sum(gr(x1[1,],x1[2,])^2),3))) -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 2. |gr| = ", round(sum(gr(x2[1,],x2[2,])^2),3))) -->
+<!-- arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x2[1,],x2[2,],x3[1,],x3[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 3. |gr| = ", round(sum(gr(x3[1,],x3[2,])^2),3))) -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x3[1,],x3[2,],x4[1,],x4[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 4. |gr| = ", round(sum(gr(x4[1,],x4[2,])^2),3))) -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x4[1,],x4[2,],x5[1,],x5[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 5. |gr| = ", round(sum(gr(x5[1,],x5[2,])^2),3))) -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x5[1,],x5[2,],x6[1,],x6[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 6. |gr| = ", round(sum(gr(x6[1,],x6[2,])^2),3))) -->
+<!-- ``` -->
+
+## Exemplo 01: máx. veros. da $\Gamma(\alpha, \lambda), \gamma = 0.5 \text{ com } \alpha_0 = 4,\lambda_0 = 2$
+
+```{r echo = FALSE}
+x0 <- matrix(c(4,2), ncol = 1)
+x1 <- x0 - 0.5*solve(hess(x0[1,], x0[2,]), gr(x0[1,], x0[2,]))
+x2 <- x1 - 0.5*solve(hess(x1[1,], x1[2,]), gr(x1[1,], x1[2,]))
+x3 <- x2 - 0.5*solve(hess(x2[1,], x2[2,]), gr(x2[1,], x2[2,]))
+x4 <- x3 - 0.5*solve(hess(x3[1,], x3[2,]), gr(x3[1,], x3[2,]))
+x5 <- x4 - 0.5*solve(hess(x4[1,], x4[2,]), gr(x4[1,], x4[2,]))
+x6 <- x5 - 0.5*solve(hess(x5[1,], x5[2,]), gr(x5[1,], x5[2,]))
+x7 <- x6 - 0.5*solve(hess(x6[1,], x6[2,]), gr(x6[1,], x6[2,]))
+contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100),
+        xlab = expression(alpha), ylab = expression(lambda),
+        levels = c(-500, -400, -300, -200, -100, -50, -40, 0),
+        z = L, main  = "Função de log-verossimilhança")
+arrows(x0[1,],x0[2,], x1[1,],x1[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x2[1,],x2[2,],x3[1,],x3[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x3[1,],x3[2,],x4[1,],x4[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x4[1,],x4[2,],x5[1,],x5[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x5[1,],x5[2,],x6[1,],x6[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x6[1,],x6[2,],x7[1,],x7[2,], length = 0.1, lwd = 2, col = "Red")
+title(sub = paste("Iteração 7. |gr| = ", round(sum(gr(x7[1,],x7[2,])^2),3)))
+```
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+* Na Aula 13, método de otimização de Newton converge em 3 iterações, para chutes iniciais $\alpha_0 = 4, \lambda_0 = 2.$ Isto é, $\|\nabla\ell(\boldsymbol\theta_3)\|^2 < 0.01.$ 
+
+* Se usarmos $\gamma = 0.5,$ apenas temos convergência em $\|\nabla\ell(\boldsymbol\theta_7)\|^2 < 0.01.$ 
+
+Mas vamos ver o que acontece com $\alpha_0 = 5, \lambda_0 = 2.$ No caso de Newton sem parâmetro $\gamma,$ tínhamos divergência. Com $\gamma = 0.5,$ temos o seguinte:
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- x0 <- matrix(c(5,2), ncol = 1) -->
+<!-- x1 <- x0 - 0.5*solve(hess(x0[1,], x0[2,]), gr(x0[1,], x0[2,])) -->
+<!-- x2 <- x1 - 0.5*solve(hess(x1[1,], x1[2,]), gr(x1[1,], x1[2,])) -->
+<!-- x3 <- x2 - 0.5*solve(hess(x2[1,], x2[2,]), gr(x2[1,], x2[2,])) -->
+<!-- x4 <- x3 - 0.5*solve(hess(x3[1,], x3[2,]), gr(x3[1,], x3[2,])) -->
+<!-- x5 <- x4 - 0.5*solve(hess(x4[1,], x4[2,]), gr(x4[1,], x4[2,])) -->
+<!-- x6 <- x5 - 0.5*solve(hess(x5[1,], x5[2,]), gr(x5[1,], x5[2,])) -->
+<!-- x7 <- x6 - 0.5*solve(hess(x6[1,], x6[2,]), gr(x6[1,], x6[2,])) -->
+<!-- x8 <- x7 - 0.5*solve(hess(x7[1,], x7[2,]), gr(x7[1,], x7[2,])) -->
+
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- arrows(x0[1,],x0[2,], x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 1. |gr| = ", round(sum(gr(x1[1,],x1[2,])^2),3))) -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 2. |gr| = ", round(sum(gr(x2[1,],x2[2,])^2),3))) -->
+<!-- arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x2[1,],x2[2,],x3[1,],x3[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 3. |gr| = ", round(sum(gr(x3[1,],x3[2,])^2),3))) -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x3[1,],x3[2,],x4[1,],x4[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 4. |gr| = ", round(sum(gr(x4[1,],x4[2,])^2),3))) -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x4[1,],x4[2,],x5[1,],x5[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 5. |gr| = ", round(sum(gr(x5[1,],x5[2,])^2),3))) -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x5[1,],x5[2,],x6[1,],x6[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 6. |gr| = ", round(sum(gr(x6[1,],x6[2,])^2),3))) -->
+<!-- ``` -->
+
+<!-- ## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda), \gamma = 0.5$ -->
+
+<!-- ```{r echo = FALSE} -->
+<!-- contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100), -->
+<!--         xlab = expression(alpha), ylab = expression(lambda), -->
+<!--         levels = c(-500, -400, -300, -200, -100, -50, -40, 0), -->
+<!--         z = L, main  = "Função de log-verossimilhança") -->
+<!-- # arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- # arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- arrows(x6[1,],x6[2,],x7[1,],x7[2,], length = 0.1, lwd = 2, col = "Red") -->
+<!-- title(sub = paste("Iteração 7. |gr| = ", round(sum(gr(x7[1,],x7[2,])^2),3))) -->
+<!-- ``` -->
+
+## Exemplo 01: máx. veros. da $\Gamma(\alpha, \lambda), \gamma = 0.5 \text{ com } \alpha_0 = 5,\lambda_0 = 2$
+
+```{r echo = FALSE}
+x0 <- matrix(c(5,2), ncol = 1)
+x1 <- x0 - 0.5*solve(hess(x0[1,], x0[2,]), gr(x0[1,], x0[2,]))
+x2 <- x1 - 0.5*solve(hess(x1[1,], x1[2,]), gr(x1[1,], x1[2,]))
+x3 <- x2 - 0.5*solve(hess(x2[1,], x2[2,]), gr(x2[1,], x2[2,]))
+x4 <- x3 - 0.5*solve(hess(x3[1,], x3[2,]), gr(x3[1,], x3[2,]))
+x5 <- x4 - 0.5*solve(hess(x4[1,], x4[2,]), gr(x4[1,], x4[2,]))
+x6 <- x5 - 0.5*solve(hess(x5[1,], x5[2,]), gr(x5[1,], x5[2,]))
+x7 <- x6 - 0.5*solve(hess(x6[1,], x6[2,]), gr(x6[1,], x6[2,]))
+x8 <- x7 - 0.5*solve(hess(x7[1,], x7[2,]), gr(x7[1,], x7[2,]))
+
+contour(x = seq(0.1, 10, l = 100), y = seq(0.1, 6, l = 100),
+        xlab = expression(alpha), ylab = expression(lambda),
+        levels = c(-500, -400, -300, -200, -100, -50, -40, 0),
+        z = L, main  = "Função de log-verossimilhança")
+# arrows(x0[1,],x0[2,],x1[1,],x1[2,], length = 0.1, lwd = 2, col = "Red")
+# arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.1, lwd = 2, col = "Red")
+arrows(x0[1,],x0[2,], x1[1,],x1[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x1[1,],x1[2,],x2[1,],x2[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x2[1,],x2[2,],x3[1,],x3[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x3[1,],x3[2,],x4[1,],x4[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x4[1,],x4[2,],x5[1,],x5[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x5[1,],x5[2,],x6[1,],x6[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x6[1,],x6[2,],x7[1,],x7[2,], length = 0.05, lwd = 2, col = "Red")
+arrows(x7[1,],x7[2,],x8[1,],x8[2,], length = 0.1, lwd = 2, col = "Red")
+title(sub = paste("Iteração 8. |gr| = ", round(sum(gr(x8[1,],x8[2,])^2),3)))
+```
+
+## Exemplo 01: máxima verossimilhança da $\Gamma(\alpha, \lambda)$
+
+* Na Aula 13, método de otimização de Newton converge em 3 iterações, para chutes iniciais $\alpha_0 = 4, \lambda_0 = 2.$ Isto é, $\|\nabla\ell(\boldsymbol\theta_3)\|^2 < 0.01.$ 
+
+* Se usarmos $\gamma = 0.5,$ apenas temos convergência em $\|\nabla\ell(\boldsymbol\theta_7)\|^2 < 0.01.$ 
+
+* Se usarmos $\alpha_0 = 5, \lambda_0 = 2$ como chute inicial, método de Newton sem parâmetro $\gamma$ diverge.
+
+* Se usarmos $\gamma = 0.5,$ temos convergência em $\|\nabla\ell(\boldsymbol\theta_8)\|^2 < 0.01.$ 
+
+Escolha do parâmetro $\gamma$ é importante, e existe uma metodologia chamada de **line search** para encontrar $\gamma$ ótimo. Note que $\gamma$ também pode ser função de $k.$ Alguns algoritmos com barreira também funcionam limitando $\gamma$ para que o passo não caia fora do espaço paramétrico (em otimização, chamam isso de "**região factível**").
+
+## Line search
+
+O algoritmo funciona para métodos gerais, além do método de Newton, como *gradient ascent/descent*. De certa forma o *conjugated gradients* sempre faz line search. Veremos esses métodos na próxima aula.
+
+Para uma função $f:\mathbb{R}^p \rightarrow \mathbb{R},$ ponto $\mathbf{x}_{k-1}$ e direção de otimização $\mathbf{p}_{k-1},$ o line search na $k$-ésima iteração consiste em 
+
+* Encontrar $\gamma_k \in (0,1]$ tal que $f(\mathbf{x}_{k-1} - \gamma \mathbf{p}_{k-1})$ seja ótima, em função de $\gamma.$
+    - Se temos $\partial f/\partial\gamma$ e conseguimos resolver $\partial f(\mathbf{x}_{k-1} - \gamma \mathbf{p}_{k-1})/\partial\gamma = 0,$ então basta tomar $\gamma_k = \{\gamma \in (0, 1] : \partial f(\mathbf{x}_{k-1} - \gamma \mathbf{p}_{k-1})/\partial\gamma = 0\},$ examinando a segunda derivada para garantir.
+    - Para funções caras, podemos usar condições aproximadas, como as condições de Wolfe: [https://en.wikipedia.org/wiki/Wolfe_conditions](https://en.wikipedia.org/wiki/Wolfe_conditions).
+* Iterar $\mathbf{x}_{k} = \mathbf{x}_{k-1} - \gamma_k \mathbf{p}_{k-1}.$
+
+## De volta ao exemplo 01: line search
+
+No caso da gamma, a direção de otimização é $\mathbf{p}_{k-1} = \mathbf{H}_\ell^{-1}\nabla \ell$ ou \[\mathbf{p}_{k-1} = \frac{1}{\psi'(\alpha)-1}\begin{pmatrix}
+-\alpha\log(\lambda) + \alpha\psi(\alpha)-\alpha\dfrac{1}{n}\displaystyle\sum_{i=1}^n\log(X_i) - \alpha - \lambda\bar{X} \\
+-\lambda\log(\lambda) + \lambda\psi(\alpha) - \lambda\dfrac{1}{n}\displaystyle\sum_{i=1}^n\log(X_i) - \alpha\lambda\psi'(\alpha) - \lambda^2 \bar{X}\psi'(\alpha)
+\end{pmatrix},\] em que $\psi(\alpha) = \frac{\mathrm{d}}{\mathrm{d} \alpha} \log(\Gamma(\alpha))$ e $\psi'(\alpha) = \frac{\mathrm{d}^2}{\mathrm{d} \alpha^2} \log(\Gamma(\alpha)).$ A log-verossimilhança em função de $\gamma$ é \[\begin{aligned}
+f(\gamma) & = \ell(\boldsymbol\theta_{k-1} - \gamma\mathbf{p}_{k-1}) \\
+& = n(\alpha_{k-1}-\gamma\mathbf{p}_{1,k-1})\log(\lambda_k - \gamma\mathbf{p}_{2,k-1}) - n\log(\Gamma(\alpha_{k-1}-\gamma\mathbf{p}_{1,k-1})) \\ 
+& {} \quad - (\lambda_k - \gamma\mathbf{p}_{2,k-1}) n\bar{x} + (\alpha_{k-1}-\gamma\mathbf{p}_{1,k-1}-1)\sum_{i=1}^n \log(x_i). \\
+\end{aligned}\] 
+
+## De volta ao exemplo 01: line search
+
+A log-verossimilhança perfilada tem derivada com respeito a $\gamma$ dada por \[\begin{aligned}
+\frac{\mathrm{d}}{\mathrm{d}\gamma} f(\gamma) & = -n\mathbf{p}_{1,k-1}\log(\lambda_k - \gamma\mathbf{p}_{2,k-1}) - n\mathbf{p}_{2,k-1}\frac{\alpha_{k-1}-\gamma\mathbf{p}_{1,k-1}}{\lambda_k - \gamma\mathbf{p}_{2,k-1}} \\ 
+& {} \quad+ n\mathbf{p}_{1,k-1}\psi(\alpha_{k-1}-\gamma\mathbf{p}_{1,k-1}) + \mathbf{p}_{2,k-1} n\bar{x} -\mathbf{p}_{1,k-1}\sum_{i=1}^n \log(x_i). \\
+\end{aligned}\] Note que implicitamente estamos assumindo $\alpha_{k-1}-\gamma\mathbf{p}_{1,k-1} > 0$ e $\lambda_k - \gamma\mathbf{p}_{2,k-1} > 0,$ caso contrário $\log$ e $\psi$ estarão mal definidas!
+
+Como não temos solução analítica, vamos tentar implementar.
+
+## De volta ao exemplo 01: line search
+
+Essa solução busca $\gamma$ num grid:
+
+```{r}
+# Verossimilhança
+l <- function(alpha, lambda, x = snow){
+  n <- length(x)
+  return(n*alpha*log(lambda) - n*log(gamma(alpha)) - 
+           lambda*sum(x) + (alpha-1)*sum(log(x)))
+}
+step <- function(alpha, lambda, x = snow) {
+  solve(hess(alpha, lambda, x), gr(alpha, lambda, x))
+}
+```
+
+## De volta ao exemplo 01: line search
+
+```{r}
+# Encontra passo ótimo
+targetStep <- function(alpha, lambda, g = (1:25)/25, x = snow){
+  pk <- step(alpha, lambda, x)
+  tg <- numeric(length(g))
+  for(i in 1:length(g)){
+    if(alpha-g[i]*pk[1] > 0 & lambda-g[i]*pk[2] > 0){
+      tg[i] <- l(alpha-g[i]*pk[1], lambda-g[i]*pk[2])
+    } else {
+      tg[i] <- NA
+    }
+  }
+  return(data.frame(g = g, tg = tg))
+}
+```
+
+## De volta ao exemplo 01: line search
+
+```{r}
+plot(targetStep(5,2), type = "b", main = "Line search")
+```
+
+## De volta ao exemplo 01: line search
+
+```{r}
+theta1 <- c(5,2)
+temp <- targetStep(5,2)
+(g <- temp[which.max(temp[,2]),1])
+(theta2 <- drop(c(5,2) - g*step(theta1[1], theta1[2])))
+# Esqueci a raiz
+sum(gr(theta2[1], theta2[2])^2)
+```
+
+## De volta ao exemplo 01: line search
+
+```{r}
+temp <- targetStep(theta2[1],theta2[2])
+(g <- temp[which.max(temp[,2]),1])
+(theta3 <- drop(theta2 - g*step(theta2[1], theta2[2])))
+# Esqueci a raiz
+sum(gr(theta3[1], theta3[2])^2)
+```
+
+## De volta ao exemplo 01: line search
+
+```{r}
+temp <- targetStep(theta3[1],theta3[2])
+(g <- temp[which.max(temp[,2]),1])
+(theta4 <- drop(theta3 - g*step(theta3[1], theta3[2])))
+# Esqueci a raiz
+sum(gr(theta4[1], theta4[2])^2)
+```
+
+## De volta ao exemplo 01: line search
+
+```{r}
+temp <- targetStep(theta4[1],theta4[2])
+(g <- temp[which.max(temp[,2]),1])
+(theta5 <- drop(theta4 - g*step(theta4[1], theta4[2])))
+# Esqueci a raiz
+sum(gr(theta5[1], theta5[2])^2)
+## Convergiu!
+```
+
+## De volta ao exemplo 01: line search
+
+Em outras palavras:
+
+* Começando o algoritmo em $\alpha_1 = 5, \lambda_1 = 2,$ não teremos convergência com o método de Newton.
+* Se eu usar um fator $\gamma = 0.5,$ consigo convergência em 8 passos. 
+* Se eu usar line search, usamos $\gamma_1 = 0.4$ e subsequentes $\gamma_k = 1$ para convergir em 5 passos apenas.
+
+Como *line search* é otimização de um parâmetro apenas, podemos encontrá-lo de maneira eficiente. Para algoritmos complexos, faz toda a diferença!
+
+Note que a função `optim` do `R`  faz *line search* automaticamente. De fato, `optim` é uma função excelente.
+
+## Método de escore de Fisher
+
+Uma modificação comum na estatística do método de Newton é o chamado método de escore de Fisher. É específico para funções de verossimilhança. No seu curso de inferência, você aprendeu que \[\mathcal{I}(\boldsymbol\theta) = -\mathbb{E}\left(\frac{\partial^2}{\partial \boldsymbol\theta \partial \boldsymbol\theta^t} \ell(\boldsymbol\theta)\right) = - \mathbb{E}\left(\mathbf{H}_\ell\right)\] é a informação de Fisher da verossimilhança $\ell,$ onde $\mathbf{H}_\ell$ é a matriz Hessiana de $\ell.$ Então o algoritmo de escore de Fisher usa \[\boldsymbol\theta_k = \boldsymbol\theta_{k-1} + \left[\mathcal{I}(\boldsymbol\theta_{k-1})\right]^{-1}\nabla \ell(\boldsymbol\theta_{k-1}).\] Note o sinal diferente. Muitas vezes o método de Newton coincide com o escore de Fisher.
+
+## Exemplo 02: Regressão logística
+
+Em um modelo de regressão logística, a resposta $Y_i \sim \text{Bernoulli}(p_i),$ isto é, $\mathbb{P}(Y_i = 1) = p_i.$ Em geral, assumimos que essa probabilidade é função de alguma covariável $x_i.$ No entanto, como precisamos garantir que $p_i \in (0,1),$ devemos fazer uma transformação (estou omitindo muitos detalhes sobre a modelagem, mas vamos usar apenas o mínimo pra prosseguir). Uma transformação muito útil é a curva logística, que resulta num modelo \[\log\left(\frac{p_i}{1-p_i}\right) = \beta_0 + \beta_1 x_i,\] ou equivalente \[p_i = \frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}}.\]
+
+## Exemplo 02: Regressão logística
+
+A verossimilhança de um modelo de regressão logística para uma amostra i.i.d. $(Y_1, x_1), \ldots, (Y_n, x_n)$ é \[\begin{aligned}
+\mathcal{L}(\beta_0,\beta_1) & = \prod_{i=1}^n p_i^{y_i}(1-p_i)^{1-y_i} \\
+& = \prod_{i=1}^n \left(\frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}}\right)^{y_i}\left(1-\frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}}\right)^{1-y_i} \\
+& = \prod_{i=1}^n \left(\frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}}\right)^{y_i}\left(\frac{1}{1+e^{\beta_0 + \beta_1 x_i}}\right)^{1-y_i}\\
+& = \prod_{i=1}^n e^{\beta_0y_i + \beta_1 x_iy_i} \left(\frac{1}{1+e^{\beta_0 + \beta_1 x_i}}\right)\\
+& = e^{\beta_0 n\bar{y} + \beta_1 \sum_{i=1}^n x_iy_i} \prod_{i=1}^n\left(\frac{1}{1+e^{\beta_0 + \beta_1 x_i}}\right)\\
+\end{aligned}\]
+
+## Exemplo 02: Regressão logística
+
+A log-verossimilhança de um modelo de regressão logística para uma amostra i.i.d. $(Y_1, x_1), \ldots, (Y_n, x_n)$ é \[\begin{aligned}
+\ell(\beta_0,\beta_1) & = \log(\mathcal{L}(\beta_0,\beta_1)) \\
+& = \beta_0 n\bar{y} + \beta_1 \sum_{i=1}^n x_iy_i - \sum_{i=1}^n\log\left(1+e^{\beta_0 + \beta_1 x_i}\right).\\
+\end{aligned}\] Não existe solução analítica, e precisamos otimizar a log-verossimilhança numericamente. Primeiramente, \[\begin{aligned}
+\frac{\partial}{\partial \beta_0} \ell(\beta_0,\beta_1) & = n\bar{y} - \sum_{i=1}^n\frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}},\\
+\frac{\partial}{\partial \beta_1} \ell(\beta_0,\beta_1) & = \sum_{i=1}^n x_iy_i - \sum_{i=1}^n\frac{x_ie^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}}.\\
+\end{aligned}\]
+
+## Exemplo 02: Regressão logística
+
+Note que \[\frac{\partial}{\partial \beta_j}\frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}} = \frac{\partial}{\partial \beta_j}\left(1  -\frac{1}{1+e^{\beta_0 + \beta_1 x_i}}\right) = +\frac{\frac{\partial}{\partial \beta_j} e^{\beta_0 + \beta_1 x_i}}{[1+e^{\beta_0 + \beta_1 x_i}]^2}\]
+
+A informação de Fisher é dada por \[\begin{aligned}\mathcal{I}(\boldsymbol\theta) = -\mathbb{E}\left(\frac{\partial^2}{\partial \boldsymbol\theta \partial \boldsymbol\theta^t} \ell(\boldsymbol\theta)\right) & = \begin{pmatrix}
+\sum_{i=1}^n \frac{e^{\beta_0 + \beta_1 x_i}}{[1+e^{\beta_0 + \beta_1 x_i}]^2} & \sum_{i=1}^n \frac{x_ie^{\beta_0 + \beta_1 x_i}}{[1+e^{\beta_0 + \beta_1 x_i}]^2} \\
+\sum_{i=1}^n \frac{x_ie^{\beta_0 + \beta_1 x_i}}{[1+e^{\beta_0 + \beta_1 x_i}]^2} & \sum_{i=1}^n \frac{x_i^2e^{\beta_0 + \beta_1 x_i}}{[1+e^{\beta_0 + \beta_1 x_i}]^2} \\
+\end{pmatrix}\\
+& = \sum_{i=1}^n \frac{e^{\beta_0 + \beta_1 x_i}}{[1+e^{\beta_0 + \beta_1 x_i}]^2} \begin{pmatrix}
+1 & x_i \\
+x_i & x_i^2 \\
+\end{pmatrix}\\
+& = \sum_{i=1}^n p_i(1-p_i) \begin{pmatrix}
+1 & x_i \\
+x_i & x_i^2 \\
+\end{pmatrix}.
+\end{aligned}\]
+
+## Exemplo 02: Regressão logística
+
+Como sabemos derivar formas matriciais, não é difícil considerar a regressão logística múltipla, para covariáveis $x_{i,1}, \ldots, x_{i,p},$ $i=1,2,\ldots,n,$ e $\mathbf{x}_i$ vetores coluna $p \times 1.$ Neste caso \[\begin{aligned}
+\mathcal{L}(\boldsymbol\beta) = \prod_{i=1}^n p_i^{y_i}(1-p_i)^{1-y_i} & = \prod_{i=1}^n \left(\frac{e^{\mathbf{x}_i^t\boldsymbol\beta}}{1+e^{\mathbf{x}_i^t\boldsymbol\beta}}\right)^{y_i}\left(1-\frac{e^{\mathbf{x}_i^t\boldsymbol\beta}}{1+e^{\mathbf{x}_i^t\boldsymbol\beta}}\right)^{1-y_i} \\
+& = \prod_{i=1}^n e^{y_i\mathbf{x}_i^t\boldsymbol\beta} \left(\frac{1}{1+e^{\mathbf{x}_i^t\boldsymbol\beta}}\right)\\
+& = e^{\mathbf{y}^t\mathbf{X}\boldsymbol\beta} \prod_{i=1}^n\left(\frac{1}{1+e^{\mathbf{x}_i^t\boldsymbol\beta}}\right)\\
+\end{aligned}\] com log-verossimilhança \[\ell(\boldsymbol\beta) = \mathbf{y}^t\mathbf{X}\boldsymbol\beta - \sum_{i=1}^n\log\left(1+e^{\mathbf{x}_i^t\boldsymbol\beta}\right).\] 
+
+## Exemplo 02: Regressão logística
+
+A derivada é simplesmente \[\frac{\partial}{\partial \boldsymbol\beta} \ell(\boldsymbol\beta) = \mathbf{y}^t\mathbf{X} - \sum_{i=1}^n\frac{1}{1+e^{\mathbf{x}_i^t\boldsymbol\beta}} \frac{\partial}{\partial \boldsymbol\beta}e^{\mathbf{x}_i^t\boldsymbol\beta} = \mathbf{y}^t\mathbf{X} - \sum_{i=1}^n\frac{e^{\mathbf{x}_i^t\boldsymbol\beta}}{1+e^{\mathbf{x}_i^t\boldsymbol\beta}}\mathbf{x}_i^t,\] que é um vetor linha como discutimos na Aula 14, ou \[\nabla \ell(\boldsymbol\beta)  = \mathbf{X}^t\mathbf{y} - \sum_{i=1}^n\frac{e^{\mathbf{x}_i^t\boldsymbol\beta}}{1+e^{\mathbf{x}_i^t\boldsymbol\beta}}\mathbf{x}_i.\] A matriz Hessiana é \[\frac{\partial^2}{\partial \boldsymbol\beta \partial \boldsymbol\beta^t} \ell(\boldsymbol\beta) = -\sum_{i=1}^n \left(\frac{e^{\mathbf{x}_i^t\boldsymbol\beta}}{[1+e^{\mathbf{x}_i^t\boldsymbol\beta}]^2} \right)\mathbf{x}_i\mathbf{x}_i^t = -\sum_{i=1}^n p_i(1-p_i)\mathbf{x}_i\mathbf{x}_i^t\]
+
+## Exemplo 02: Regressão logística
+
+Esse conjunto de dados é do livro @cannon2012stat2, e está no pacote `Stat2Data`:
+
+"The Corporate Average Fuel Economy (CAFE) bill was proposed by Senators John McCain and John Kerry to improve the fuel economy of cars and light trucks sold in the United States. However a critical vote on an amendment in March of 2002 threatened to indefinitely postpone CAFE. The amendment charged the National Highway Traffic Safety Administration to develop a new standard, the effect being to put on indefinite hold the McCain-Kerry bill. It passed by a vote of 62-38. A political question of interest is whether there is evidence of monetary influence on a senator's vote. Scott Preston, a professor of statistics at SUNY, Oswego, collected data on this vote which includes the vote of each senator (1=Yes or 0=No) and monetary contributions that each of the 100 senators received over his or her lifetime from the car manufacturers."
+
+## Exemplo 02: Regressão logística
+
+\scriptsize
+Does the contribution affected whether a senator voted Yes or No?
+
+```{r echo=FALSE}
+op <- options(width = 90)
+```
+
+```{r}
+library(Stat2Data)
+data(CAFE)
+head(CAFE, n=10)
+```
+
+## Exemplo 02: Regressão logística
+
+
+```{r echo=FALSE}
+options(op)
+```
+
+```{r}
+with(CAFE, table(Dem, Vote))
+tab <- with(CAFE, table(Dem, Vote))
+chisq.test(tab)
+```
+
+## Exemplo 02: Regressão logística
+
+```{r echo=FALSE}
+plot(jitter(Vote, factor=.1) ~ LogContr, data=CAFE, col="Blue", cex=.75, ylab="Vote")
+points(jitter(Vote, factor=.1) ~ LogContr, data=CAFE[CAFE$Party=="R",], col="Red", cex=.75)
+legend("bottomright", legend=c("Dem/Other","Rep"), pch=1, col=c("Blue","Red"), inset=.1)
+```
+
+## Exemplo 02: Regressão logística
+
+\scriptsize
+Modelo de regressão é incorreto
+
+```{r echo=FALSE}
+summary(lm(Vote ~ LogContr*Dem, data=CAFE))
+```
+
+## Exemplo 02: Regressão logística
+
+```{r echo=FALSE}
+plot(jitter(Vote, factor=.1) ~ LogContr, data=CAFE, col="Blue", cex=.75, ylab="Vote")
+points(jitter(Vote, factor=.1) ~ LogContr, data=CAFE[CAFE$Party=="R",], col="Red", cex=.75)
+legend("bottomright", legend=c("Dem/Other","Rep"), pch=1, col=c("Blue","Red"), inset=.1)
+d <- coef(lm(Vote ~ LogContr*Dem, data=CAFE))
+abline(d[1],d[2], col="Red")
+abline(d[1]+d[3],d[2]+d[4], col="Blue")
+```
+
+## Exemplo 02: Regressão logística
+
+\tiny
+A função `glm()` encontra os estimadores de máxima verossimilhança a partir do escore de Fisher:
+
+```{r}
+summary(glm(Vote ~ LogContr*Dem, data=CAFE, family=binomial()))
+```
+
+## Exemplo 02: Regressão logística
+
+```{r echo=FALSE}
+funlog <- function(x){
+  return(exp(x)/(1+exp(x)))
+}
+plot(jitter(Vote, factor=.1) ~ LogContr, data=CAFE, col="Blue", cex=.75, ylab="Vote")
+points(jitter(Vote, factor=.1) ~ LogContr, data=CAFE[CAFE$Party=="R",], col="Red", cex=.75)
+legend("bottomright", legend=c("Dem/Other","Rep"), pch=1, col=c("Blue","Red"), inset=.1)
+d <- coef(glm(Vote ~ LogContr*Dem, data=CAFE, family=binomial()))
+x <- seq(-5,8, length.out=200)
+rep <- d[1] + d[2]*x
+dem <- d[1]+d[3] + (d[2]+d[4])*x
+lines(x, funlog(rep), col="Red")
+lines(x, funlog(dem), col="Blue")
+```
+
+## Exemplo 02: Regressão logística
+
+Mas lembre-se: a função `glm()` evoca um método de otimização! Este exemplo foi postado no blog do Andrew Gelman [http://andrewgelman.com/2011/05/04/whassup_with_gl/](http://andrewgelman.com/2011/05/04/whassup_with_gl/)
+
+```{r}
+# Creates a fake y value
+y <- rep (c(1,0), c(10,5))
+y
+# We want to fit a glm() with formula
+y ~ 1
+# which means: regress on a constant 
+```
+
+## Exemplo 02: Regressão logística
+
+```{r}
+glm(y ~ 1, family = binomial()) # Works
+```
+
+## Exemplo 02: Regressão logística
+
+```{r}
+glm(y ~ 1, family = binomial(), start = 5) # Doesn't work!
+```
+
+<!-- ## De volta ao exemplo 01: line search -->
+
+<!-- ```{r} -->
+<!-- # Esqueci que optim precisa de vetores como argumentos -->
+<!-- lv <- function(theta, x = snow){ -->
+<!--   l(theta[1],theta[2],x) -->
+<!-- } -->
+<!-- grv <- function(theta, x = snow){ -->
+<!--   gr(theta[1],theta[2],x) -->
+<!-- } -->
+<!-- hessv <- function(theta, x = snow){ -->
+<!--   hess(theta[1],theta[2],x) -->
+<!-- } -->
+<!-- optim(c(5,2), fn = lv, gr = grv) -->
+<!-- ``` -->
+
+## Atualização do calendário
+
+* A aula 16 envolverá otimização baseada no gradiente: *Gradient ascent/descent*, *conjugated gradient*, e (como usar o) algoritmo BFGS.
+
+* A aula 17 foi a aula de revisão antes da prova (05/05) e aula 18 foi a aula da prova (07/05).
+
+* O material da prova 2 provavelmente incluirá até a aula 16. Vou tentar preparar uma lista ASAP.
+
+* A prova 2 ocorrerá no 18/06, como planejamos no início do semestre. Eu vou continuar preparando material da disciplina depois da prova, mas só vou cobrá-lo no exame.
+
+## Bibliografia
