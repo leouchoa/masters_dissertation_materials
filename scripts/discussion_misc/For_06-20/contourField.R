@@ -20,7 +20,6 @@ S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5,
 
 log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 
-par(mfrow = c(2,2),pty="s")
 
 grid_01 <- construct_grid(
   seq(0.8,2.5,length.out = 15),
@@ -33,7 +32,7 @@ plot_llike_contour(var_1 = "sigma2_1",
                    var_2 = "a",
                    grid_df = grid_01,
                    obs = log_cd,
-                   true_param = c(1,2))
+                   true_param = c(1,1))
 
 grid_02 <- construct_grid(
   1,
@@ -46,7 +45,7 @@ plot_llike_contour(var_1 = "a",
                    var_2 = "rho",
                    grid_df = grid_02,
                    obs = log_cd,
-                   true_param = c(2,0.5))
+                   true_param = c(1,0.5))
 
 grid_03 <- construct_grid(
   seq(0.25,1.5,length.out = 15),

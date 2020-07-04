@@ -54,8 +54,8 @@ plot_llike_contour <- function(var_1,var_2,grid_df,obs,true_param = NULL, n_bins
     matrix(eval_llike_results,ncol = 15),
     nlevels = n_bins,
     xlab = var_1,
-    ylab = var_2,
-    main = "Contornos da Log-Verossimilhança")
+    ylab = var_2)
+    #main = "Contornos da Log-Verossimilhança")
   
   if( !is.null(true_param) ){
     points(true_param[1],true_param[2],pch = 8)
