@@ -86,7 +86,7 @@ C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
 &+
 \frac{1}{\sigma^2_1} y_1^{T} \Bigg[
 C_{11}( \textbf{h} | \nu_1,a)y_1 + C_{12}( \textbf{h}| \nu_3,a)y_2
-\Bigg]y_1
+\Bigg]
 \Bigg\}
 \end{aligned}
 \end{equation}
@@ -108,12 +108,12 @@ C_{11} - C_{12}C^{-1}_{22}C_{11}
 \Bigg]^{-1} 
 = \\
 &\Bigg[
-\sigma^2_1 M(\textbf{h}|a,\nu_1) - \frac{\rho \sigma^2_1 \sigma^2_2}{\sigma^2_2}M(\textbf{h}|a,\nu_3)M(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
+\sigma^2_1 M(\textbf{h}|a,\nu_1) - \frac{\rho \sigma^2_1 \sigma^2_2}{\sigma^2_2}M(\textbf{h}|a,\nu_3)M^{-1}(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
 \Bigg]^{-1} 
 = \\
 &\frac{1}{\sigma^2_1}
 \Bigg[
-M(\textbf{h}|a,\nu_1) - \rho M(\textbf{h}|a,\nu_3)M(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
+M(\textbf{h}|a,\nu_1) - \rho M(\textbf{h}|a,\nu_3)M^{-1}(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
 \Bigg]^{-1}
 \end{aligned}
 \end{equation}
@@ -126,9 +126,9 @@ Agora
 \begin{aligned}
 &C^{\star}_{12} = -C^{-1}_{22}C_{11}C^{\star}_{11} \\
 &=
--\frac{\rho}{\sigma_1}C_{22}M(\textbf{h}|a,\nu_3)
+-\frac{\rho}{\sigma^2_1}C_{22}M(\textbf{h}|a,\nu_3)
 tr\Bigg[
-M(\textbf{h}|a,\nu_1) - \rho M(\textbf{h}|a,\nu_3)M(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
+M(\textbf{h}|a,\nu_1) - \rho M(\textbf{h}|a,\nu_3)M^{-1}(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
 \Bigg]^{-1}
 \end{aligned}
 \end{equation}
