@@ -5,7 +5,7 @@
 
 suppressPackageStartupMessages(library(BivMaternEstim))
 # library(ggplot2)
-source("contourField_funs.R")
+source("contour_funs.R")
 set.seed(123)
 # options(ggplot2.continuous.colour="viridis")
 # theme_set(theme_minimal())

@@ -134,22 +134,6 @@ plot_llike_contour_field <- function(var_1,var_2,grid_df,obs,n_bins = 30,true_pa
   
   colnames(grad_matrix) <- c("sigma2_1","sigma2_2","a","rho")
 
-  # didn't understand how to aprox lbfgs updates
-  # how about newton? Don't either know how to do it simply bcs of llike
-  
-  # # arrows(x0 = grid_df[,var_1], y0 = grid_df[,var_2],
-  # #        x1 = grid_df[,var_1] - 0.01/grad_matrix[,var_1], y1 = grad_matrix[,var_2] - 0.01/grad_matrix[,var_2],
-  # #        length = 0.05, lwd = 2, 
-  # #        col = ifelse(grid_df[,1] + grad_matrix[,var_1] < 0 | grid_df[,2] + grad_matrix[,var_2] < 0, "Red", "Blue"))
-  # 
-  # # "newton" here
-  # 
-  # arrows(x0 = grid_df[,var_1], y0 = grid_df[,var_2],
-  #        x1 = grid_df[,var_1] - 0.01*eval_llike_results/grad_matrix[,var_1], y1 = grad_matrix[,var_2] - 0.01*eval_llike_results/grad_matrix[,var_2],
-  #        length = 0.05, lwd = 2, 
-  #        col = ifelse(grid_df[,1] + grad_matrix[,var_1] < 0 | grid_df[,2] + grad_matrix[,var_2] < 0, "Red", "Blue"))
-  
-  #don't feel like this is correct
   arrows(x0 = grid_df[,var_1], y0 = grid_df[,var_2],
          x1 = grid_df[,var_1] + gamma_plot*grad_matrix[,var_1], y1 = grid_df[,var_2] + gamma_plot*grad_matrix[,var_2],
          length = 0.05, lwd = 2)
@@ -160,7 +144,7 @@ plot_llike_contour_field <- function(var_1,var_2,grid_df,obs,n_bins = 30,true_pa
 suppressPackageStartupMessages(library(BivMaternEstim))
 set.seed(123)
 
-
+par(mfrow = c(2,2),pty="s")
 
 n <- 100
 coords <- matrix(runif(2*n), ncol = 2)
@@ -176,33 +160,39 @@ grid_02 <- construct_grid(
   1,
   1,
   seq(0.5,3,length.out = 15),
-  seq(0.4,0.9,length.out = 15)
+  seq(0.25,0.75,length.out = 15)
 )
-
-
-plot_llike_contour_field("a","rho",grid_df = grid_02,obs = log_cd)
 
 
 grid_01 <- construct_grid(
   seq(0.8,2.5,length.out = 15),
   1,
   seq(0.8,2.5,length.out = 15),
-  0.2)
-
-plot_llike_contour_field("sigma2_1","a",grid_df = grid_01,obs = log_cd)
+  0.2
+  )
 
 grid_03 <- construct_grid(
   seq(0.25,1.5,length.out = 15),
   seq(0.25,1.5,length.out = 15),
   2,
-  0.5)
-
-plot_llike_contour_field("sigma2_1","sigma2_2",grid_df = grid_03,obs = log_cd)
+  0.5
+  )
 
 grid_04 <- construct_grid(
   seq(0.25,1.5,length.out = 15),
   1,
   1,
-  seq(0.4,0.8,length.out = 15))
+  seq(0.25,0.75,length.out = 15)
+  )
 
-plot_llike_contour_field("sigma2_1","rho",grid_df = grid_04,obs = log_cd,gamma_plot = 0.0005)
+
+plot_llike_contour_field("a","rho",grid_df = grid_02,obs = log_cd, gamma_plot = 1)
+plot_llike_contour_field("sigma2_1","a",grid_df = grid_01,obs = log_cd, gamma_plot = 1)
+plot_llike_contour_field("sigma2_1","sigma2_2",grid_df = grid_03,obs = log_cd, gamma_plot = 1)
+plot_llike_contour_field("sigma2_1","rho",grid_df = grid_04,obs = log_cd, gamma_plot = 1)
+
+
+plot_llike_contour_field("a","rho",grid_df = grid_02,obs = log_cd)
+plot_llike_contour_field("sigma2_1","a",grid_df = grid_01,obs = log_cd)
+plot_llike_contour_field("sigma2_1","sigma2_2",grid_df = grid_03,obs = log_cd)
+plot_llike_contour_field("sigma2_1","rho",grid_df = grid_04,obs = log_cd)

@@ -233,6 +233,7 @@ grid_02 <- construct_grid(
 )
 
 par(mfrow = c(1,2))
+
 plot_llike_contour_field_fisher("a","rho",grid_df = grid_02,obs = log_cd)
 plot_llike_contour_field("a","rho",grid_df = grid_02,obs = log_cd)
 

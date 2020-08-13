@@ -39,23 +39,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Matriz de Fisher na entrada $i=1,j=2$
 
-\begin{equation}
-\begin{aligned}
-\dot{l}_1(\boldsymbol{\theta})\dot{l}_2(\boldsymbol{\theta}) =
-\frac{1}{4}
-\Bigg\{
-\Bigg[
-tr(\boldsymbol{\Sigma}^{-1}\frac{\partial \boldsymbol{\Sigma}}{\theta_1}) -
-\textbf{z}^{T}(\boldsymbol{\Sigma}^{-1} \frac{\partial \boldsymbol{\Sigma}}{\theta_1}\boldsymbol{\Sigma}^{-1})\textbf{z}
-\Bigg]* \\
-\Bigg[
-tr(\boldsymbol{\Sigma}^{-1}\frac{\partial \boldsymbol{\Sigma}}{\theta_2}) -
-\textbf{z}^{T}(\boldsymbol{\Sigma}^{-1} \frac{\partial \boldsymbol{\Sigma}}{\theta_2}\boldsymbol{\Sigma}^{-1})\textbf{z}
-\Bigg]
-\Bigg\}
-\end{aligned}
-\end{equation}
-
+q
 ## Matriz de Fisher na entrada $i=1,j=2$
 
 >- Sem condições de encontrar a esperança disso, até tentei

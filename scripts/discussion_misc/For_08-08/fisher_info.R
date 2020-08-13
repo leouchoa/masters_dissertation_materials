@@ -1,6 +1,8 @@
 get_fisher_info <- function(theta_vec,nus,coords_matrix){
   
-  tr <- function(x){sum(diag(x))}
+  tr <- function(x){
+    sum(diag(x))
+    }
   
   # ------ Params Extraction -------  
   
@@ -19,7 +21,7 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
                                                         rho,
                                                         nus,
                                                         coords_matrix,
-                                                        FALSE
+                                                        FALSE,
   )
   
   sigma_matrix_inv <- BivMaternEstim:::block_inv(sigma_matrix)
