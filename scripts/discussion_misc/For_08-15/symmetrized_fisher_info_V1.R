@@ -54,12 +54,11 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' 
   #' 
   #' 
-  #' 
   
   sigma2_1_deriv <- create_sigma2_1_deriv(sigmas,as,rho,coords_matrix)
   B_sigma2_1 <- sigma_matrix_inv %*% sigma2_1_deriv
   tr_B_sigma2_1 <- tr(B_sigma2_1)
-
+  sym_sigma2_1 <- sigma_matrix_inv %*% (sigma2_1_deriv + t(sigma2_1_deriv))
   
   #' # Caso em que $\theta = \sigma^2_1$ 
   #' 
@@ -67,12 +66,11 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' 
   #' 
   #' 
-  #' 
   
   sigma2_2_deriv <- create_sigma2_2_deriv(sigmas,as,rho,coords_matrix)
   B_sigma2_2 <- sigma_matrix_inv %*% sigma2_2_deriv
   tr_B_sigma2_2 <- tr(B_sigma2_2)
-  
+  sym_sigma2_2 <- sigma_matrix_inv %*% (sigma2_2_deriv + t(sigma2_2_deriv))
   
   #' # Caso em que $\theta = \rho$ 
   #' 
@@ -80,18 +78,16 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' 
   #' 
   #' 
-  #' 
   
   rho_deriv <- create_rho_deriv(sigmas,as,rho,coords_matrix)
   B_rho <- sigma_matrix_inv %*% rho_deriv
   tr_B_rho <- tr(B_rho)
-  
-  
+  sym_rho <- sigma_matrix_inv %*% (rho_deriv + t(rho_deriv))
   
   #' # Caso em que $\theta = a$ 
   #' 
   #' $B = \Sigma^{-1} \frac{\partial \Sigma}{\partial a}$
-  #' 
+  #' $D = \Sigma^{-1} \frac{\partial \Sigma^{T}}{\partial a}$
   #' 
   #' 
   #' 
@@ -99,7 +95,7 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   a_deriv <- create_a_deriv(M_dash_nu_1,M_dash_nu_2,M_dash_nu_3,sigmas,as,rho,coords_matrix)
   B_a <- sigma_matrix_inv %*% a_deriv
   tr_B_a <- tr(B_a)
-  
+  sym_a <- sigma_matrix_inv %*% (a_deriv %*% t(a_deriv))
   
   # -------------- Fisher Information ---------------
   
@@ -111,16 +107,21 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' ## Fisher information for $\sigma^2_1$
   
   F_11 <- 0.25 *(
-    tr( B_sigma2_1 %*% B_sigma2_1 ) - 
-      tr_B_sigma2_1^2
+    
+    tr_B_sigma2_1^2 -
+    tr(sym_sigma2_1) * tr_B_sigma2_1 + 
+    0.5 * tr(sym_sigma2_1 %*% sym_sigma2_1)
       
   )
   
   #' ## Fisher information for $\sigma^2_1$ and $\sigma^2_2$
   
   F_12 <- 0.25 *(
-    tr( B_sigma2_1 %*% B_sigma2_2 ) - 
-      tr_B_sigma2_1 * tr_B_sigma2_2
+    
+    tr_B_sigma2_1 * tr_B_sigma2_2 -
+    0.5 * tr(sym_sigma2_1) * tr_B_sigma2_1 -
+    0.5 * tr(sym_sigma2_2) * tr_B_sigma2_2 + 
+    0.5 * tr(sym_sigma2_1 %*% sym_sigma2_2)
     
   )
   
@@ -128,8 +129,11 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   
   
   F_13 <- 0.25 *(
-    tr(B_sigma2_1 %*% B_rho) - 
-      tr_B_sigma2_1 * tr_B_rho
+    
+    tr_B_sigma2_1 * tr_B_rho -
+      0.5 * tr(sym_sigma2_1) * tr_B_sigma2_1 -
+      0.5 * tr(sym_rho) * tr_B_rho + 
+      0.5 * tr(sym_sigma2_1 %*% sym_rho)
     
   )
   
@@ -138,8 +142,11 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   
   
   F_14 <- 0.25 *(
-    tr( B_sigma2_1 %*% B_a ) - 
-      tr_B_sigma2_1 * tr_B_a
+    
+    tr_B_sigma2_1 * tr_B_a -
+      0.5 * tr(sym_sigma2_1) * tr_B_sigma2_1 -
+      0.5 * tr(sym_a) * tr_B_a + 
+      0.5 * tr(sym_sigma2_1 %*% sym_a)
     
   )
   
@@ -149,8 +156,10 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' ## Fisher information for $\sigma^2_2$
   
   F_22 <- 0.25 *(
-    tr( B_sigma2_2 %*% B_sigma2_2 ) - 
-      tr_B_sigma2_2^2
+    
+    tr_B_sigma2_2^2 -
+    tr(sym_sigma2_2) * tr_B_sigma2_2 + 
+    0.5 * tr(sym_sigma2_2 %*% sym_sigma2_2)
     
   )
   
@@ -160,18 +169,24 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   
   
   F_23 <- 0.25 *(
-    tr( B_sigma2_2 %*% B_rho ) - 
-      tr_B_sigma2_2 * tr_B_rho
+    
+    tr_B_sigma2_2 * tr_B_rho -
+      0.5 * tr(sym_sigma2_2) * tr_B_sigma2_2 -
+      0.5 * tr(sym_rho) * tr_B_rho + 
+      0.5 * tr(sym_sigma2_2 %*% sym_rho)
     
   )
   
-  
   #' ## Fisher information for $\sigma^2_2$ and $a$
-  #'
+  #' 
+  
   
   F_24 <- 0.25 *(
-    tr(B_sigma2_2 %*% B_a) - 
-      tr_B_sigma2_2 * tr_B_a
+    
+    tr_B_sigma2_2 * tr_B_a -
+      0.5 * tr(sym_sigma2_2) * tr_B_sigma2_2 -
+      0.5 * tr(sym_a) * tr_B_a + 
+      0.5 * tr(sym_sigma2_2 %*% sym_a)
     
   ) 
   
@@ -182,8 +197,10 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' ## Fisher information for $\rho$
   
   F_33 <- 0.25 *(
-    tr(B_rho %*% B_rho) - 
-      tr_B_rho^2
+    
+    tr_B_rho^2 -
+    tr(sym_rho) * tr_B_rho + 
+    0.5 * tr(sym_rho %*% sym_rho)
     
   )
   
@@ -194,8 +211,11 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' 
   
   F_34 <- 0.25 *(
-    tr(B_rho %*% B_a) - 
-      tr_B_rho * tr_B_a
+    
+    tr_B_rho * tr_B_a -
+      0.5 * tr(sym_rho) * tr_B_rho -
+      0.5 * tr(sym_a) * tr_B_a + 
+      0.5 * tr(sym_rho %*% sym_a)
     
   )
   
@@ -205,8 +225,10 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
   #' 
   
   F_44 <- 0.25 *(
-    tr(B_a %*% B_a) - 
-      tr_B_a^2
+    
+    tr_B_a^2 -
+      tr(sym_a) * tr_B_a + 
+      0.5 * tr(sym_a %*% sym_a)
     
   )
   
@@ -238,37 +260,37 @@ get_fisher_info <- function(theta_vec,nus,coords_matrix){
 }
 
 # ---- test -----
-
-source("a_deriv_symmetry.R")
-source("sigma2_1_deriv_symmetry.R")
-source("sigma2_2_deriv_symmetry.R")
-source("rho_deriv_symmetry.R")
-
-set.seed(1234)
-coords_matrix <- matrix(runif(2*100), ncol = 2)
-d <- dist(coords_matrix)
-sigmas <- c(1,1)
-nus <- c(0.5,0.5);nus[3] <- mean(nus)
-as <- rep(2,3)
-rho <- 0.5
-theta_vec <- c(sigmas,as[3],rho)
-
-M_dash_nu_1 <- BivMaternEstim:::matern_deriv(a = as[1], 
-                                             nu = nus[1], 
-                                             coords_matrix = coords_matrix)
-
-M_dash_nu_2 <- BivMaternEstim:::matern_deriv(a = as[2], 
-                                             nu = nus[2], 
-                                             coords_matrix = coords_matrix)
-
-M_dash_nu_3 <- BivMaternEstim:::matern_deriv(a = as[3], 
-                                             nu = nus[3], 
-                                             coords_matrix = coords_matrix)
-
-create_sigma2_1_deriv(sigmas,as,rho,coords_matrix)
-create_sigma2_2_deriv(sigmas,as,rho,coords_matrix)
-create_a_deriv(M_dash_nu_1,M_dash_nu_2,M_dash_nu_3,sigmas,as,nus)
-create_rho_deriv(sigmas,as,rho,coords_matrix)
-
+# 
+# source("a_deriv_symmetry.R")
+# source("sigma2_1_deriv_symmetry.R")
+# source("sigma2_2_deriv_symmetry.R")
+# source("rho_deriv_symmetry.R")
+# 
+# set.seed(123)
+# coords_matrix <- matrix(runif(2*100), ncol = 2)
+# d <- dist(coords_matrix)
+# sigmas <- c(1,1)
+# nus <- c(0.5,0.5);nus[3] <- mean(nus)
+# as <- rep(2,3)
+# rho <- 0.5
+# theta_vec <- c(sigmas,as[3],rho)
+# 
+# M_dash_nu_1 <- BivMaternEstim:::matern_deriv(a = as[1], 
+#                                              nu = nus[1], 
+#                                              coords_matrix = coords_matrix)
+# 
+# M_dash_nu_2 <- BivMaternEstim:::matern_deriv(a = as[2], 
+#                                              nu = nus[2], 
+#                                              coords_matrix = coords_matrix)
+# 
+# M_dash_nu_3 <- BivMaternEstim:::matern_deriv(a = as[3], 
+#                                              nu = nus[3], 
+#                                              coords_matrix = coords_matrix)
+# 
+# create_sigma2_1_deriv(sigmas,as,rho,coords_matrix)
+# create_sigma2_2_deriv(sigmas,as,rho,coords_matrix)
+# create_a_deriv(M_dash_nu_1,M_dash_nu_2,M_dash_nu_3,sigmas,as,nus)
+# create_rho_deriv(sigmas,as,rho,coords_matrix)
+# 
 # debugonce(get_fisher_info)
-get_fisher_info(theta_vec = theta_vec,nus = nus,coords_matrix = coords_matrix)
+# get_fisher_info(theta_vec = theta_vec,nus = nus,coords_matrix = coords_matrix)

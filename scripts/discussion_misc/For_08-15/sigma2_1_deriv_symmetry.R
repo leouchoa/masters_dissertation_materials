@@ -21,7 +21,7 @@ create_sigma2_1_deriv <- function(sigmas,
                                         )
   
   
-  D_22_sigma2_1 <- matrix(0,nrow(coords),nrow(coords))
+  D_22_sigma2_1 <- matrix(0,nrow(coords_matrix),nrow(coords_matrix))
   
   
   # Matrix::isSymmetric(Deriv_matrix_sigma2_1)
