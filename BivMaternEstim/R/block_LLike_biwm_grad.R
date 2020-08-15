@@ -6,7 +6,7 @@ block_LLike_biwm_grad <- function(theta,
 
 
 
-  Z <- as.numeric(t(apply(obs_matrix, 1, function(x) x - mu)))
+  Z <- t(apply(obs_matrix, 1, function(x) x - mu))
 
   sigmas <- theta[1:2]
   as <- theta[3]
@@ -28,11 +28,11 @@ block_LLike_biwm_grad <- function(theta,
 
   autocov_matrix_inv <- block_inv(autocov_matrix)
 
-  y_1 <- autocov_matrix_inv$C_11_star %*% obs_matrix[,1] +
-               autocov_matrix_inv$C_12_star %*% obs_matrix[,2]
+  y_1 <- autocov_matrix_inv$C_11_star %*% Z[,1] +
+               autocov_matrix_inv$C_12_star %*% Z[,2]
 
-  y_2 <- t(autocov_matrix_inv$C_12_star) %*% obs_matrix[,1] +
-               autocov_matrix_inv$C_22_star %*% obs_matrix[,2]
+  y_2 <- t(autocov_matrix_inv$C_12_star) %*% Z[,1] +
+               autocov_matrix_inv$C_22_star %*% Z[,2]
 
   # ----- Grad of sigma^2_1 -----
   sigma_1_tr <-
@@ -113,7 +113,7 @@ block_LLike_biwm_grad <- function(theta,
 
 
 # # ---- Usage ----
-#
+
 # source("block_inv.R")
 # source("utils.R")
 # source("matern_deriv.R")
@@ -129,7 +129,7 @@ block_LLike_biwm_grad <- function(theta,
 # temp <- rnorm(2*n)
 # log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #
-# new_grad <- block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
+# new_grad <- BivMaternEstim:::block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
 #
 # source("../old_code/matrices_assembler.R")
 # source("../old_code/general_LLike_deriv.R")

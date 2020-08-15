@@ -252,23 +252,30 @@ nus <- c(0.5,0.5);nus[3] <- mean(nus)
 as <- rep(2,3)
 rho <- 0.5
 theta_vec <- c(sigmas,as[3],rho)
+S <- sigma_assembler_biwm(sigmas = sigmas, a = as[1], rho = rho, nus = nus, coords_matrix = coords_matrix,combined = TRUE)
+temp <- rnorm(2*n)
+log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 
-M_dash_nu_1 <- BivMaternEstim:::matern_deriv(a = as[1], 
-                                             nu = nus[1], 
+M_dash_nu_1 <- BivMaternEstim:::matern_deriv(a = as[1],
+                                             nu = nus[1],
                                              coords_matrix = coords_matrix)
 
-M_dash_nu_2 <- BivMaternEstim:::matern_deriv(a = as[2], 
-                                             nu = nus[2], 
+M_dash_nu_2 <- BivMaternEstim:::matern_deriv(a = as[2],
+                                             nu = nus[2],
                                              coords_matrix = coords_matrix)
 
-M_dash_nu_3 <- BivMaternEstim:::matern_deriv(a = as[3], 
-                                             nu = nus[3], 
+M_dash_nu_3 <- BivMaternEstim:::matern_deriv(a = as[3],
+                                             nu = nus[3],
                                              coords_matrix = coords_matrix)
 
-create_sigma2_1_deriv(sigmas,as,rho,coords_matrix)
-create_sigma2_2_deriv(sigmas,as,rho,coords_matrix)
-create_a_deriv(M_dash_nu_1,M_dash_nu_2,M_dash_nu_3,sigmas,as,nus)
-create_rho_deriv(sigmas,as,rho,coords_matrix)
+# create_sigma2_1_deriv(sigmas,as,rho,coords_matrix)
+# create_sigma2_2_deriv(sigmas,as,rho,coords_matrix)
+# create_a_deriv(M_dash_nu_1,M_dash_nu_2,M_dash_nu_3,sigmas,as,nus)
+# create_rho_deriv(sigmas,as,rho,coords_matrix)
 
 # debugonce(get_fisher_info)
 get_fisher_info(theta_vec = theta_vec,nus = nus,coords_matrix = coords_matrix)
+
+new_grad <- BivMaternEstim:::block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
+
+outer(new_grad,new_grad)
