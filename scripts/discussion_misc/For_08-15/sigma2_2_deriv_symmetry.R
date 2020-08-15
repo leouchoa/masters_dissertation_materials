@@ -1,4 +1,4 @@
-create_sigma2_1_deriv <- function(sigmas,
+create_sigma2_2_deriv <- function(sigmas,
                                   as,
                                   rho,
                                   coords_matrix,
