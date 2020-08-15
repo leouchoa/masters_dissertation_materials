@@ -244,15 +244,16 @@ source("sigma2_1_deriv_symmetry.R")
 source("sigma2_2_deriv_symmetry.R")
 source("rho_deriv_symmetry.R")
 
-set.seed(1234)
-coords_matrix <- matrix(runif(2*100), ncol = 2)
+set.seed(12345)
+n <- 100
+coords_matrix <- matrix(runif(2*n), ncol = 2)
 d <- dist(coords_matrix)
 sigmas <- c(1,1)
 nus <- c(0.5,0.5);nus[3] <- mean(nus)
 as <- rep(2,3)
 rho <- 0.5
 theta_vec <- c(sigmas,as[3],rho)
-S <- sigma_assembler_biwm(sigmas = sigmas, a = as[1], rho = rho, nus = nus, coords_matrix = coords_matrix,combined = TRUE)
+S <- BivMaternEstim:::sigma_assembler_biwm(sigmas = sigmas, a = as[1], rho = rho, nus = nus, coords_matrix = coords_matrix,combined = TRUE)
 temp <- rnorm(2*n)
 log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 
@@ -276,6 +277,6 @@ M_dash_nu_3 <- BivMaternEstim:::matern_deriv(a = as[3],
 # debugonce(get_fisher_info)
 get_fisher_info(theta_vec = theta_vec,nus = nus,coords_matrix = coords_matrix)
 
-new_grad <- BivMaternEstim:::block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
+new_grad <- BivMaternEstim:::block_LLike_biwm_grad(theta_vec,nus,colMeans(log_cd),coords_matrix,log_cd)
 
 outer(new_grad,new_grad)
