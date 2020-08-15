@@ -1,20 +1,17 @@
-block_inv <- function(matrix_list,combined = FALSE){
+block_inv <- function(matrix_list, combined = FALSE){
 
-  V_1 <- solve(matrix_list[[2]],matrix_list[[3]])
+  V_1 <- solve(matrix_list[[2]], t(matrix_list[[3]]))
 
   V_2 <- matrix_list[[1]] - matrix_list[[3]] %*% V_1
 
   C_11_st <- solve(V_2)
 
-  C_12_st <- - tcrossprod(C_11_st,V_1)
-
-  # C_21_st <- t(C_12_star)
+  C_12_st <- -1*tcrossprod(C_11_st, t(V_1))
 
   C_22_st <- solve(matrix_list[[2]]) - V_1 %*% C_12_st
 
   out <- list(C_11_star = C_11_st,
               C_12_star = C_12_st,
-              # C_21_star = t(C_12_st),
               C_22_star = C_22_st)
 
   if(combined){
