@@ -4,13 +4,21 @@ block_log_det <- function(matrix_list){
     stop("sigma_assembler_biwm didn't return 3 matrices",call. = FALSE)
   }
 
+  # log(det(
+  #   matrix_list[[1]] -
+  #     matrix_list[[3]] %*%
+  #     solve(matrix_list[[2]],t(matrix_list[[3]]))
+  # )) +
+  #
+  #   log(det(matrix_list[[2]]))
+
   log(det(
-    matrix_list[[1]] -
-      matrix_list[[3]] %*%
-      solve(matrix_list[[2]],t(matrix_list[[3]]))
+    matrix_list$C_11 -
+      matrix_list$C_12 %*%
+      solve(matrix_list$C_22,t(matrix_list$C_12))
   )) +
 
-    log(det(matrix_list[[2]]))
+    log(det(matrix_list$C_22))
 
 }
 
