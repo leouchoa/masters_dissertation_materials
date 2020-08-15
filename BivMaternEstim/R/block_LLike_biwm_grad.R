@@ -114,27 +114,27 @@ block_LLike_biwm_grad <- function(theta,
 
 # # ---- Usage ----
 #
-source("block_inv.R")
-source("utils.R")
-source("matern_deriv.R")
-source("matern_cov_wrapper.R")
-source("sigma_assembler_biwm.R")
-
-set.seed(1233)
-n <- 40
-theta_test <- c(1,1,2,0.5)
-coords_test <- matrix(runif(2*n), ncol = 2)
-nus_test <- rep(0.5,2)
-S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = nus_test, coords_matrix = coords_test,combined = TRUE)
-temp <- rnorm(2*n)
-log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
-
-new_grad <- block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
-
-source("../old_code/matrices_assembler.R")
-source("../old_code/general_LLike_deriv.R")
-source("../old_code/LLike_biwm_reduced_grad.R")
-source("../old_code/sigma_assembler_biwm.R")
-
-old_grad <- LLike_biwm_reduced_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
-
+# source("block_inv.R")
+# source("utils.R")
+# source("matern_deriv.R")
+# source("matern_cov_wrapper.R")
+# source("sigma_assembler_biwm.R")
+#
+# set.seed(1233)
+# n <- 40
+# theta_test <- c(1,1,2,0.5)
+# coords_test <- matrix(runif(2*n), ncol = 2)
+# nus_test <- rep(0.5,2)
+# S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = nus_test, coords_matrix = coords_test,combined = TRUE)
+# temp <- rnorm(2*n)
+# log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
+#
+# new_grad <- block_LLike_biwm_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
+#
+# source("../old_code/matrices_assembler.R")
+# source("../old_code/general_LLike_deriv.R")
+# source("../old_code/LLike_biwm_reduced_grad.R")
+# source("../old_code/sigma_assembler_biwm.R")
+#
+# old_grad <- LLike_biwm_reduced_grad(theta_test,nus_test,colMeans(log_cd),coords_test,log_cd)
+#
