@@ -3,6 +3,10 @@ make_countours_with_fisher <- function(true_theta = c(1,1,2,0.5), n = 70){
   suppressPackageStartupMessages(library(BivMaternEstim))
   set.seed(123)
   
+  source("fisher_scripts/sigma2_1_deriv_symmetry.R")
+  source("fisher_scripts/sigma2_2_deriv_symmetry.R")
+  source("fisher_scripts/a_deriv_symmetry.R")
+  source("fisher_scripts/rho_deriv_symmetry.R")
   
   
   coords <- matrix(runif(2*n), ncol = 2)

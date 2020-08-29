@@ -103,7 +103,7 @@ block_LLike_biwm_grad <- function(theta,
   a_grad <- -0.5*(a_tr - a_qf)
 
 
-    return(c(
+    return(0.0005 * c(
       sigmas = c(sigma_1_grad,sigma_2_grad),
       a = a_grad,
       rho = rho_grad
