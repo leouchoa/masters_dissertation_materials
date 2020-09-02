@@ -31,19 +31,19 @@ simulate_and_fit_biwm <-
     )
 }
 
-fitbiwm_sim_summary <- function(simulation_obj){
-  setNames(
-    as.data.frame(
-      rbind(
-        true_param = round(resultado$true_param,5),
-        initial_guess = round(simulation_obj$initial_guess,5),
-        estimated_generic = round(simulation_obj$generic_guess$theta,5),
-        estimated_informed = round(simulation_obj$informed_guess$theta,5)
-      )
-    ),
-    c("sigma2_1","sigma2_2","a","rho")
-  )
-}
+# fitbiwm_sim_summary <- function(simulation_obj){
+#   setNames(
+    # as.data.frame(
+    #   rbind(
+    #     true_param = round(resultado$true_param,5),
+    #     initial_guess = round(simulation_obj$initial_guess,5),
+    #     estimated_generic = round(simulation_obj$generic_guess$theta,5),
+    #     estimated_informed = round(simulation_obj$informed_guess$theta,5)
+    #   )
+#     ),
+#     c("sigma2_1","sigma2_2","a","rho")
+#   )
+# }
 
 # ------- USAGE --------
 

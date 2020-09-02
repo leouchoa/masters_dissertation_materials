@@ -1,6 +1,7 @@
 make_countours_without_fisher <- function(true_theta = 
                                           c(1,1,2,0.5), 
-                                          n =70
+                                          n =70,
+                                          gamma_plot_val = 0.0005
                                           ){
 
   suppressPackageStartupMessages(library(BivMaternEstim))
@@ -37,7 +38,7 @@ make_countours_without_fisher <- function(true_theta =
     
     
     
-  plot_llike_contour_field("sigma2_1","a",grid_df = grid_01,obs = log_cd,coords = coords)
+  plot_llike_contour_field("sigma2_1","a",grid_df = grid_01,obs = log_cd,coords = coords,gamma_plot = gamma_plot_val)
   
   
   grid_02 <- construct_grid(
@@ -47,7 +48,7 @@ make_countours_without_fisher <- function(true_theta =
     seq(0.25,0.75,length.out = 15)
   )
   
-  plot_llike_contour_field("a","rho",grid_df = grid_02,obs = log_cd,coords = coords, gamma_plot = 0.0005)
+  plot_llike_contour_field("a","rho",grid_df = grid_02,obs = log_cd,coords = coords, gamma_plot = gamma_plot_val)
 
   
   
@@ -61,7 +62,7 @@ make_countours_without_fisher <- function(true_theta =
     0.5)
 
 
-  plot_llike_contour_field("sigma2_1","sigma2_2",grid_df = grid_03,obs = log_cd,coords = coords)
+  plot_llike_contour_field("sigma2_1","sigma2_2",grid_df = grid_03,obs = log_cd,gamma_plot = gamma_plot_val)
 
   
   
@@ -73,7 +74,7 @@ make_countours_without_fisher <- function(true_theta =
     seq(0.25,0.75,length.out = 15)
   )
 
-  plot_llike_contour_field("sigma2_1","rho",grid_df = grid_04,obs = log_cd,coords = coords,gamma_plot = 0.0005)
+  plot_llike_contour_field("sigma2_1","rho",grid_df = grid_04,obs = log_cd,coords = coords,gamma_plot = gamma_plot_val)
 
 
 }
