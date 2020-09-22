@@ -1,3 +1,9 @@
+#' It's necessary to the script `contourField_funs.R` to be in the same folder as the file contains complementary functions
+#' 
+#' 
+#' 
+#' IT DOESNT WORK IF THE GRADIENT IS ALREADY PRE-MULTIPLIED BY `gamma_plot_val` because it will be really small. A **not** possible workaround its to pass `gamma_plot_val` with inverse scale 
+
 make_countours_without_fisher <- function(true_theta = 
                                           c(1,1,2,0.5), 
                                           n =70,
@@ -6,6 +12,8 @@ make_countours_without_fisher <- function(true_theta =
 
   suppressPackageStartupMessages(library(BivMaternEstim))
   set.seed(123)
+  
+  source("contourField_funs.R")
 
 
 
@@ -83,4 +91,22 @@ make_countours_without_fisher <- function(true_theta =
 # ----- Test -----
 
 make_countours_without_fisher()
+
+gamma_vec <- c(0.005,0.0005,0.00005,0.000005,0.0000005)
+
+for(i in gamma_vec[1]){
+  
+  file_name = paste0(
+    "contours_gamma_plot_",
+    gamma_vec[i],
+    ".pdf"
+    )
+  
+  pdf("rplot.pdf", width = 8.27, height = 11.69)
+  
+  make_countours_without_fisher(gamma_plot_val = gamma_vec[i])
+  
+  dev.off()
+}
+
 
