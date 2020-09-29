@@ -1,5 +1,4 @@
-#' @export
-sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix, combined = FALSE){
+sigma_assembler_biwm_nug <- function(sigmas, a, rho, nus, coords_matrix, combined = FALSE){
 
   d <- dist(coords_matrix)
 
