@@ -8,6 +8,7 @@
 #' coords <- matrix(runif(2*n), ncol = 2)
 #' temp <- rnorm(2*n)
 #' nus_vec <- c(0.5,0.5)
+#' sample.int(123123,1)
 #'
 #' true_theta = c(1,1,2,0.5)
 #' sigma2_1_grid <- seq(0.5,2,length.out = 15)
