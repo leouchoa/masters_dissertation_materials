@@ -1,4 +1,4 @@
-cov_with_new_loc <- function(loc_new,loc_obs,sigmas, a, rho, nus,nug_vec = c(0.0010,0.001), combined = FALSE){
+cov_with_new_loc <- function(loc_new,loc_obs,sigmas, a, rho, nus, combined = FALSE){
   
   
   # NEED TO DO POINTWISE DISTANCE
@@ -15,13 +15,13 @@ cov_with_new_loc <- function(loc_new,loc_obs,sigmas, a, rho, nus,nug_vec = c(0.0
   M_1 <- sigmas[1] * matern_cov_wrapper_krig(d,
                                         a = a,
                                         nu = nus[1])
-  diag(M_1) <- diag(M_1) + nug_vec[1]
+  diag(M_1) <- diag(M_1) + 0.001
   
   M_2 <- sigmas[2] * matern_cov_wrapper_krig(d,
                                         a = a,
                                         nu = nus[2])
   
-  diag(M_2) <- diag(M_2) + nug_vec[2]
+  diag(M_2) <- diag(M_2) + 0.001
   
   M_12 <- rho * sqrt(sigmas[1] * sigmas[2]) * matern_cov_wrapper_krig(d,
                                                                  a = a,

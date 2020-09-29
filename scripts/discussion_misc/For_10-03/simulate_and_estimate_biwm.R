@@ -1,4 +1,4 @@
-simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_number = 123){
+simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,nus_vec = c(0.5,0.5),seed_number = 123){
   
   set.seed(seed_number)
   library(RandomFields)
@@ -48,7 +48,7 @@ simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_
   
    
   x <- seq(-1, 1, length.out = 40)
-  model <- RMbiwm(nudiag=c(0.5, 0.5), nured=1, rhored=true_rho, cdiag=true_sigmas, s= rep(true_a,3))
+  model <- RMbiwm(nudiag = nus_vec, nured = 1, rhored = true_rho, cdiag = true_sigmas, s = rep(true_a,3))
   
   print(model)
   
@@ -82,7 +82,10 @@ simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_
                                  comp_2 = "Composição 2",
                                  comp_3 = "Composição 3"))) + 
     labs(x = "", y = "") +
-    scale_fill_viridis_c()
+    scale_fill_viridis_c() +
+    labs(
+      title = "Processo Simulado"
+    )
   
   
   sampled_biwm_sim_df <- biwm_sim_df[sample(nrow(biwm_sim_df),n_points),]
@@ -90,21 +93,21 @@ simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_
   generic_test <- fit_biwm(sampled_biwm_sim_df[,1:2], 
                            sampled_biwm_sim_df[,3:4], 
                            initial_params,
-                           c(0.5, 0.5)
+                           nus_vec
   )
   
-  
+
   cat(
+    "Estimated parameters are: \n \n",
     paste(
-      "Estimated parameters are: ",
-      "\n \n",
-      cat(
+      round(
         generic_test$theta,
-        sep = "\n"
-      )
-    )
+        3
+      ),
+      collapse =  "\n"
+    ),
+    "\n \n"
   )
-  
   
   krig_grid <- as.matrix(expand.grid(x,x))
   
@@ -115,7 +118,7 @@ simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_
       a = generic_test$theta[3]
       ,rho = generic_test$theta[4],
       coords_matrix = sampled_biwm_sim_df[,3:4],
-      nus = c(0.5,0.5),
+      nus = nus_vec,
       combined = TRUE
     )
   
@@ -126,7 +129,7 @@ simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_
       sigmas = generic_test$theta[1:2],
       a = generic_test$theta[3],
       rho = generic_test$theta[4],
-      nus = c(0.5,0.5),
+      nus = nus_vec,
       combined = TRUE
     )
   
@@ -179,7 +182,11 @@ simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_
                                  comp_02_pred = "Composição 2",
                                  comp_03_pred = "Composição 3"))) + 
     labs(x = "", y = "") +
-    scale_fill_viridis_c()
+    scale_fill_viridis_c() +
+    labs(
+      title = "Predição Composicional",
+      subtitle = paste("Pontos Amostrados:", n_points)
+    )
   
   
   gridExtra::grid.arrange(
@@ -191,4 +198,3 @@ simulate_and_estimate_biwm <- function(n_points,true_params,initial_params,seed_
 
 
 
-simulate_and_estimate_biwm(40,c(1,2,1.5,0.4),c(1,2,1.5,0.4))

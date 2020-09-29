@@ -1,6 +1,6 @@
 #' Log-likelihood of the Bivariate (Wittle-)Matern Model.
 #'
-#' @param obs_matrix A n x 2 numeric matrix of data. We assume that the user has already log-transformed the data.
+#' @param obs_matrix A n x 2 numeric matrix of data. We assume that the user has already alr-transformed the data.
 #' @param coords_matrix A n x 2 numeric matrix of coordinates for the data.
 #' @param theta0 Initial values for the optimizer. A 4 x 1 numeric vector, the order of parameters is: theta = c(sigma_1^2, sigma_2^2, a, rho).
 #' @param nus A 2 x 1 numeric vector with the smoothness coefficients for the Mat\'{e}rn covariance function, c(nu1, nu2).

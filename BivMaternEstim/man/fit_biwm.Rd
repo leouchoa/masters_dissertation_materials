@@ -7,7 +7,7 @@
 fit_biwm(obs_matrix, coords_matrix, theta0, nus, verbosity = 0, ...)
 }
 \arguments{
-\item{obs_matrix}{A n x 2 numeric matrix of data. We assume that the user has already log-transformed the data.}
+\item{obs_matrix}{A n x 2 numeric matrix of data. We assume that the user has already alr-transformed the data.}
 
 \item{coords_matrix}{A n x 2 numeric matrix of coordinates for the data.}
 
