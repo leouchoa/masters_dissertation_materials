@@ -31,18 +31,12 @@
 #'   a_grid,
 #'   0.2)
 #'
-#' plot_loglike_contour_ggplot("sigma2_1","a",grid_df = grid_01,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(1,3)])
-#'
-#'
 #' grid_02 <- construct_grid(
 #'   1,
 #'   1,
 #'   a_grid,
 #'   rho_grid
 #' )
-#'
-#' plot_loglike_contour_ggplot("a","rho",grid_df = grid_02,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(3,4)])
-#'
 #'
 #'
 #' grid_03 <- construct_grid(
@@ -51,17 +45,24 @@
 #'   2,
 #'   0.5)
 #'
-#' plot_loglike_contour_ggplot("sigma2_1","sigma2_2",grid_df = grid_03,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(1,2)])
-#'
-#'
-#'
-#'
 #' grid_04 <- construct_grid(
 #'   sigma2_1_grid,
 #'   1,
 #'   1,
 #'   rho_grid
 #' )
+#'
+#'
+#' plot_loglike_contour_ggplot("sigma2_1","a",grid_df = grid_01,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(1,3)])
+#'
+#'
+#' plot_loglike_contour_ggplot("a","rho",grid_df = grid_02,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(3,4)])
+#'
+#'
+#'
+#' plot_loglike_contour_ggplot("sigma2_1","sigma2_2",grid_df = grid_03,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(1,2)])
+#'
+#'
 #'
 #' plot_loglike_contour_ggplot("sigma2_1","rho",grid_df = grid_04,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(1,4)])
 #'

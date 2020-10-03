@@ -6,6 +6,7 @@ library(patchwork)
 library(ggforce)
 library(RandomFields)
 library(gstat)
+library(sp)
 # library(ggtern) #please don't load this
 theme_set(theme_minimal())
 options(ggplot2.continuous.colour="viridis")

@@ -36,6 +36,10 @@
 
 compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_matrix,nus){
 
+  if(class(krig_locations) != "matrix" | class(fit_locations) != "matrix"){
+    krig_locations <- as.matrix(krig_locations)
+    fit_locations <- as.matrix(fit_locations)
+  }
 
   sigma_hat <-
     sigma_assembler_biwm(
