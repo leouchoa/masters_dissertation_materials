@@ -63,7 +63,7 @@ contour_sigma2_1_a <-
 contour_a_rho <- plot_loglike_contour_ggplot("a","rho",grid_df = grid_02,obs = log_cd,coords = coords,nbins = 30,gamma_plot =1e3,true_param = true_theta[c(3,4)]) +
   theme(legend.position="none") +
   labs(
-    x = expression(rho)
+    y = expression(rho)
   )
 
 
