@@ -10,6 +10,8 @@
 #' nus_vec <- c(0.5,0.5)
 #' sample.int(123123,1)
 #'
+#'
+#'
 #' true_theta = c(1,1,2,0.5)
 #' sigma2_1_grid <- seq(0.5,2,length.out = 15)
 #' sigma2_2_grid <- seq(0.5,2,length.out = 15)
@@ -19,7 +21,7 @@
 #' S <- sigma_assembler_biwm(sigmas = true_theta[1:2],
 #'                           a = true_theta[3],
 #'                           rho = true_theta[4],
-#'                           nus = c(0.5, 0.5),
+#'                           nus_vector = nus_vec,
 #'                           coords_matrix = coords,
 #'                           combined = TRUE)
 #'
@@ -69,7 +71,7 @@
 #'
 
 
-plot_loglike_contour_ggplot <- function(var_1,var_2,grid_df,obs, coords,true_param = NULL,nbins = 30,gamma_plot = 1){
+plot_loglike_contour_ggplot <- function(var_1,var_2,grid_df,obs, coords,nus_vector,true_param = NULL,nbins = 30,gamma_plot = 1){
 
 
   eval_loglike_results <- rep(0,nrow(grid_df))
@@ -89,7 +91,7 @@ plot_loglike_contour_ggplot <- function(var_1,var_2,grid_df,obs, coords,true_par
 
     grad_matrix[i,] <-  block_LLike_biwm_grad(
       theta = as.matrix(grid_df[i,]),
-      nus = c(0.5, 0.5),
+      nus = nus_vector,
       coords_matrix = coords,
       obs_matrix = obs,
       mu = colMeans(obs)
@@ -98,7 +100,7 @@ plot_loglike_contour_ggplot <- function(var_1,var_2,grid_df,obs, coords,true_par
 
   colnames(grad_matrix) <- c("sigma2_1","sigma2_2","a","rho")
 
-  ggplot(grid_df,
+  contour_plot <- ggplot(grid_df,
          aes_string(var_1, var_2, z = eval_loglike_results)
   ) +
     geom_contour(bins = nbins) +
@@ -110,12 +112,24 @@ plot_loglike_contour_ggplot <- function(var_1,var_2,grid_df,obs, coords,true_par
         yend = grid_df[,var_2] + gamma_plot*grad_matrix[,var_2]
       ),
       arrow = arrow(length = unit(0.15,"cm"))
-    ) +
-    theme_minimal() +
-    geom_point(
-      aes(x = true_param[1],y = true_param[2], color = "red"),
-      shape = 8,
-      size = 3
+    ) + theme_minimal()
+
+  if(!is.null(true_param)){
+    return(
+      contour_plot +
+        geom_point(
+          aes(x = true_param[1],y = true_param[2], color = "red"),
+          shape = 8,
+          size = 3
+        )
     )
+  }else{
+    return(
+      contour_plot
+    )
+  }
+
+
 
 }
+

@@ -1,8 +1,9 @@
 block_LLike_biwm_grad <- function(theta,
-                                    nus,
-                                    mu,
-                                    coords_matrix,
-                                    obs_matrix){
+                                  nus,
+                                  mu,
+                                  coords_matrix,
+                                  obs_matrix,
+                                  nug_vec){
 
 
 
@@ -24,7 +25,8 @@ block_LLike_biwm_grad <- function(theta,
                                          a = as,
                                          rho = rho,
                                          nus = nus,
-                                         coords_matrix = coords_matrix)
+                                         coords_matrix = coords_matrix,
+                                         nug_vec = nug_vec)
 
   autocov_matrix_inv <- block_inv(autocov_matrix)
 
@@ -103,7 +105,7 @@ block_LLike_biwm_grad <- function(theta,
   a_grad <- -0.5*(a_tr - a_qf)
 
 
-    return(0.0000005 * c(
+    return(0.000005 * c(
       sigmas = c(sigma_1_grad,sigma_2_grad),
       a = a_grad,
       rho = rho_grad

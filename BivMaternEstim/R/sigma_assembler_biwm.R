@@ -1,5 +1,5 @@
 #' @export
-sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix, combined = FALSE){
+sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix,nug_vec, combined = FALSE){
 
   d <- dist(coords_matrix)
 
@@ -8,13 +8,13 @@ sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix, combined = 
   M_1 <- sigmas[1] * matern_cov_wrapper(d,
                                         a = a,
                                         nu = nus[1])
-  diag(M_1) <- diag(M_1) + 0.001
+  diag(M_1) <- diag(M_1) + nug_vec
 
   M_2 <- sigmas[2] * matern_cov_wrapper(d,
                                         a = a,
                                         nu = nus[2])
 
-  diag(M_2) <- diag(M_2) + 0.001
+  diag(M_2) <- diag(M_2) + nug_vec
 
   M_12 <- rho * sqrt(sigmas[1] * sigmas[2]) * matern_cov_wrapper(d,
                                                            a = a,

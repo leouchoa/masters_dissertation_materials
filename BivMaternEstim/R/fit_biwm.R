@@ -29,7 +29,9 @@
 fit_biwm <- function(obs_matrix,
                      coords_matrix,
                      theta0,
-                     nus, verbosity = 0, ...){
+                     nus,
+                     nug_vec,
+                     verbosity = 0, ...){
 
   if(length(nus) != 2){
     stop("Smoothness parameter vector must be of length 2", call. = FALSE)
@@ -57,8 +59,10 @@ fit_biwm <- function(obs_matrix,
                lower = c(0.001, 0.001, 0.001, -min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
                upper = c(Inf, Inf, Inf, min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
                control = list(fnscale = -1, trace = verbosity),
-               nus = nus,  mu = mu, # We always use Z = vec(\mathbf{Y} - boldsymbol\mu), maybe center it outside function?
+               nus = nus,
+               mu = mu, # We always use Z = vec(\mathbf{Y} - boldsymbol\mu), maybe center it outside function?
                coords_matrix = coords_matrix,
+               nug_vec = nug_vec,
                obs_matrix = obs_matrix)
 
   # Update mu with generalized least squares, maybe update mle

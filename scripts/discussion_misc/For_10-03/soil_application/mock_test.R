@@ -1,6 +1,9 @@
 soil_dts_fit_mock <- soil_dts_fit
 
-soil_dts_fit_mock$theta <- c(1,1,0.4,-0.1)
+# soil_dts_fit_mock$theta <- c(1,1,0.4,-0.1)
+soil_dts_fit_mock$theta <- c(1,1,0.5,0)
+
+initial_point <- c(1,1,0.5,0)
 
 coords_range <- apply(coordinates(soil_dts),2,range)
 
