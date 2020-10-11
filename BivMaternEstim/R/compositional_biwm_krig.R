@@ -22,7 +22,7 @@
 #' temp <- rnorm(2*n)
 #' nus_vec <- c(0.5, 0.5)
 #' S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5,
-#' nus = nus_vec, coords_matrix = coords, combined = TRUE)
+#' nus = nus_vec, coords_matrix = coords, combined = TRUE,nug_vec = nug_vec)
 #' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #'
 #' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), nus_vec)
@@ -48,7 +48,8 @@ compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_ma
       ,rho = biwm_fit$theta[4],
       coords_matrix = fit_locations,
       nus = nus,
-      combined = TRUE
+      combined = TRUE,
+      nug_vec = nug_vec
     )
 
 

@@ -134,6 +134,7 @@ simulate_and_estimate_biwm <- function(n_points,
       ,rho = generic_test$theta[4],
       coords_matrix = sampled_biwm_sim_df[,3:4],
       nus = nus_vec,
+      nug_vec = nug_vec
       combined = TRUE
     )
 

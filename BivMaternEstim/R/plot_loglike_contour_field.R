@@ -23,7 +23,8 @@
 #'                           rho = true_theta[4],
 #'                           nus_vector = nus_vec,
 #'                           coords_matrix = coords,
-#'                           combined = TRUE)
+#'                           combined = TRUE,
+#'                           nug_vec = nug_vec)
 #'
 #' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #'

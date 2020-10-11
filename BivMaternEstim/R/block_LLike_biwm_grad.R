@@ -127,7 +127,7 @@ block_LLike_biwm_grad <- function(theta,
 # theta_test <- c(1,1,2,0.5)
 # coords_test <- matrix(runif(2*n), ncol = 2)
 # nus_test <- rep(0.5,2)
-# S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = nus_test, coords_matrix = coords_test,combined = TRUE)
+# S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5, nus = nus_test, coords_matrix = coords_test,combined = TRUE,nug_vec = nug_vec)
 # temp <- rnorm(2*n)
 # log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #

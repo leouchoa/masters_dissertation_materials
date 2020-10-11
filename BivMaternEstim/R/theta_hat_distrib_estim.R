@@ -42,6 +42,7 @@ theta_hat_hist <- function(true_param,
                                    rho = true_param[4],
                                    nus = nus_vec,
                                    coords_matrix = coords_random,
+                                   nug_vec = nug_vec,
                                    combined = TRUE
   )
 
