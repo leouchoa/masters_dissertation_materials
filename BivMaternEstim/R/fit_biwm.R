@@ -19,12 +19,13 @@
 #' n <- 40
 #' coords <- matrix(runif(2*n), ncol = 2)
 #' temp <- rnorm(2*n)
+#' nug_vec <- c(0,0)
 #' S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5,
-#' nus = c(0.5, 0.5), coords_matrix = coords, combined = TRUE)
+#' nus = c(0.5, 0.5), coords_matrix = coords, nug_vec = nug_vec, combined = TRUE)
 #' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #'
-#' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5))
-#' generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5))
+#' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5),nug_vec = nug_vec)
+#' generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5),nug_vec = nug_vec)
 #'
 fit_biwm <- function(obs_matrix,
                      coords_matrix,

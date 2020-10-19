@@ -8,13 +8,13 @@ sigma_assembler_biwm <- function(sigmas, a, rho, nus, coords_matrix,nug_vec, com
   M_1 <- sigmas[1] * matern_cov_wrapper(d,
                                         a = a,
                                         nu = nus[1])
-  diag(M_1) <- diag(M_1) + nug_vec
+  diag(M_1) <- diag(M_1) + nug_vec[1]
 
   M_2 <- sigmas[2] * matern_cov_wrapper(d,
                                         a = a,
                                         nu = nus[2])
 
-  diag(M_2) <- diag(M_2) + nug_vec
+  diag(M_2) <- diag(M_2) + nug_vec[2]
 
   M_12 <- rho * sqrt(sigmas[1] * sigmas[2]) * matern_cov_wrapper(d,
                                                            a = a,

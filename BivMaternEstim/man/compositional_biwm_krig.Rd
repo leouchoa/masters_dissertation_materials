@@ -9,7 +9,8 @@ compositional_biwm_krig(
   krig_locations,
   fit_locations,
   obs_matrix,
-  nus
+  nus,
+  nug_vec
 )
 }
 \arguments{
@@ -35,16 +36,17 @@ n <- 40
 coords <- matrix(runif(2*n), ncol = 2)
 temp <- rnorm(2*n)
 nus_vec <- c(0.5, 0.5)
+nug_vec <- c(0,0)
 S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5,
-nus = nus_vec, coords_matrix = coords, combined = TRUE)
+nus = nus_vec, coords_matrix = coords, combined = TRUE,nug_vec = nug_vec)
 log_cd <- matrix(temp\%*\%chol(S) + rep(c(1,2), each = n), ncol = 2)
 
-informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), nus_vec)
-biwm_fit <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), nus_vec)
+informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), nus_vec,nug_vec = nug_vec)
+biwm_fit <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), nus_vec,nug_vec = nug_vec)
 
 x_grid <- seq(0,1,length.out = 10)
 krig_locations <- as.matrix(expand.grid(x_grid,x_grid))
 
-compositional_biwm_krig(biwm_fit,krig_locations,coords,log_cd,nus_vec)
+compositional_biwm_krig(biwm_fit,krig_locations,coords,log_cd,nus_vec,nug_vec)
 
 }

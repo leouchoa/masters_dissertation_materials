@@ -9,13 +9,15 @@
 #' true_params = c(1,3,1,0.9),
 #' initial_params = initial_point,
 #' seed_number = sample.int(123123,1),
-#' nus_vec = c(1,1.5)
+#' nus_vec = c(1,1.5),
+#' nug_vec = c(2,2)
 #' )
 
 simulate_and_estimate_biwm <- function(n_points,
                                        true_params,
                                        initial_params,
                                        nus_vec = c(0.5,0.5),
+                                       nug_vec,
                                        seed_number = 123
                                        ){
 
@@ -134,7 +136,7 @@ simulate_and_estimate_biwm <- function(n_points,
       ,rho = generic_test$theta[4],
       coords_matrix = sampled_biwm_sim_df[,3:4],
       nus = nus_vec,
-      nug_vec = nug_vec
+      nug_vec = nug_vec,
       combined = TRUE
     )
 
