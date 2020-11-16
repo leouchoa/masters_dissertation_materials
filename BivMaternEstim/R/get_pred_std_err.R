@@ -43,8 +43,8 @@ get_pred_std_err <- function(loc_new,loc_obs,biwm_fit,nus,nug_vec){
   aux_df <-
     alr_inv(
       cbind(
-        diag(cond_cov_mat)[1:(nrow(loc_new))],
-        diag(cond_cov_mat)[(nrow(loc_new) + 1):(2*nrow(loc_new))]
+        sqrt(diag(cond_cov_mat)[1:(nrow(loc_new))]),
+        sqrt(diag(cond_cov_mat)[(nrow(loc_new) + 1):(2*nrow(loc_new))])
       )
     )
 

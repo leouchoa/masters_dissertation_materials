@@ -1,6 +1,18 @@
 cov_with_new_loc <- function(loc_new,loc_obs,sigmas, a, rho, nus, nug_vec, combined = FALSE){
 
 
+  # a solution to df names not matching
+
+  if(class(loc_new) != "matrix" | class(loc_obs) != "matrix"){
+    loc_new <- as.matrix(loc_new)
+    loc_obs <- as.matrix(loc_obs)
+  }
+
+  # if(names(loc_obs) != names(loc_new)){
+  #   names(loc_obs) <- c("coord_x","coord_x")
+  #   names(loc_new) <- c("coord_x","coord_x")
+  # }
+
   # NEED TO DO POINTWISE DISTANCE
   d <- as.matrix(dist(rbind(loc_obs,loc_new)))
   #
@@ -15,13 +27,13 @@ cov_with_new_loc <- function(loc_new,loc_obs,sigmas, a, rho, nus, nug_vec, combi
   M_1 <- sigmas[1] * matern_cov_wrapper_krig(d,
                                         a = a,
                                         nu = nus[1])
-  diag(M_1) <- diag(M_1)
+
 
   M_2 <- sigmas[2] * matern_cov_wrapper_krig(d,
                                         a = a,
                                         nu = nus[2])
 
-  diag(M_2) <- diag(M_2)
+
 
   M_12 <- rho * sqrt(sigmas[1] * sigmas[2]) * matern_cov_wrapper_krig(d,
                                                                  a = a,

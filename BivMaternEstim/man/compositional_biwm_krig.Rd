@@ -10,7 +10,8 @@ compositional_biwm_krig(
   fit_locations,
   obs_matrix,
   nus,
-  nug_vec
+  nug_vec,
+  return_comp = TRUE
 )
 }
 \arguments{

@@ -35,7 +35,7 @@
 #'compositional_biwm_krig(biwm_fit,krig_locations,coords,log_cd,nus_vec,nug_vec)
 #'
 
-compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_matrix,nus,nug_vec){
+compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_matrix,nus,nug_vec,return_comp = TRUE){
 
   if(class(krig_locations) != "matrix" | class(fit_locations) != "matrix"){
     krig_locations <- as.matrix(krig_locations)
@@ -97,10 +97,14 @@ compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_ma
       c("process_01_pred","process_02_pred","coord_x","coord_y")
     )
 
-  return(
-    cbind(
-      alr_inv(z_prediction[,c("process_01_pred","process_02_pred")]),
-      z_prediction[,c("coord_x","coord_y")]
+  if(return_comp){
+    return(
+      cbind(
+        alr_inv(z_prediction[,c("process_01_pred","process_02_pred")]),
+        z_prediction[,c("coord_x","coord_y")]
       )
-  )
+    )
+  }else{
+    return(z_prediction)
+  }
 }
