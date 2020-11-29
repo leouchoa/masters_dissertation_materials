@@ -35,7 +35,7 @@ ggplot(cross_vario[,c(2,3,6)], aes(dist,gamma)) +
   ) +
   theme_minimal()
 
-initial_point <- c(1,1,0,0.5)
+initial_point <- c(1,1,0.5,0)
 nus_vec <- c(1,1)
 
 soil_dts_fit <- fit_biwm(

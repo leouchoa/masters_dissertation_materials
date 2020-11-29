@@ -9,15 +9,21 @@
 #' true_params = c(1,3,1,0.9),
 #' initial_params = initial_point,
 #' seed_number = sample.int(123123,1),
-#' nus_vec = c(1,1.5)
+#' nus_vec = c(1,1.5),
+#' nug_vec = c(2,2)
 #' )
 
 simulate_and_estimate_biwm <- function(n_points,
                                        true_params,
                                        initial_params,
                                        nus_vec = c(0.5,0.5),
+                                       nug_vec = c(0,0),
                                        seed_number = 123
                                        ){
+
+  if(nug_vec[1] != nug_vec[2]){
+    stop("nug_vec must be the same.", call. = FALSE)
+  }
 
   set.seed(seed_number)
   suppressPackageStartupMessages(library(RandomFields))
@@ -63,9 +69,14 @@ simulate_and_estimate_biwm <- function(n_points,
 
 
   x <- seq(-1, 1, length.out = 40)
-  model <- RMbiwm(nudiag = nus_vec, nured = 1, rhored = true_rho, cdiag = true_sigmas, s = rep(true_a,3))
+  if(nug_vec == c(0,0)){
+    model <- RMbiwm(nudiag = nus_vec, nured = 1, rhored = true_rho, cdiag = true_sigmas, s = rep(true_a,3))
+  }else{
+    model <- RMbiwm(nudiag = nus_vec, nured = 1, rhored = true_rho, cdiag = true_sigmas, s = rep(true_a,3)) + RMnugget(var = nug_vec[1],vdim = 2)
+  }
 
   print(model)
+  plot(model)
 
   biwm_sim <- RFsimulate(model, x, x)
   my_grid <- expand.grid(x,x)
@@ -105,11 +116,12 @@ simulate_and_estimate_biwm <- function(n_points,
 
   sampled_biwm_sim_df <- biwm_sim_df[sample(nrow(biwm_sim_df),n_points),]
 
-  generic_test <- fit_biwm(sampled_biwm_sim_df[,1:2],
-                           sampled_biwm_sim_df[,3:4],
-                           initial_params,
-                           nus_vec
-  )
+  generic_test <- fit_biwm(obs_matrix = sampled_biwm_sim_df[,1:2],
+                           coords_matrix = sampled_biwm_sim_df[,3:4],
+                           theta0 = initial_params,
+                           nus = nus_vec,
+                           nug_vec = nug_vec
+                           )
 
 
   cat(
@@ -134,6 +146,7 @@ simulate_and_estimate_biwm <- function(n_points,
       ,rho = generic_test$theta[4],
       coords_matrix = sampled_biwm_sim_df[,3:4],
       nus = nus_vec,
+      nug_vec = nug_vec,
       combined = TRUE
     )
 
@@ -145,6 +158,7 @@ simulate_and_estimate_biwm <- function(n_points,
       a = generic_test$theta[3],
       rho = generic_test$theta[4],
       nus = nus_vec,
+      nug_vec = nug_vec,
       combined = TRUE
     )
 
@@ -212,7 +226,8 @@ simulate_and_estimate_biwm <- function(n_points,
   return(
     list(
       biwm_sim_df = biwm_sim_df,
-      compositions_prediction = compositions_prediction
+      compositions_prediction = compositions_prediction,
+      loc_used = sampled_biwm_sim_df[,3:4]
     )
   )
 }

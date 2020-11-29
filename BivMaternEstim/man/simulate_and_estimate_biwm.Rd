@@ -9,6 +9,7 @@ simulate_and_estimate_biwm(
   true_params,
   initial_params,
   nus_vec = c(0.5, 0.5),
+  nug_vec,
   seed_number = 123
 )
 }
@@ -22,6 +23,7 @@ sim_result <- simulate_and_estimate_biwm(n_points = 80,
 true_params = c(1,3,1,0.9),
 initial_params = initial_point,
 seed_number = sample.int(123123,1),
-nus_vec = c(1,1.5)
+nus_vec = c(1,1.5),
+nug_vec = c(2,2)
 )
 }

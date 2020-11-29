@@ -41,7 +41,7 @@ block_inv <- function(matrix_list, combined = FALSE){
 # distances <- dist(matrix(runif(30),ncol = 2))
 # theta <- c(1.5,2,2,0.5)
 #
-# test_matrix <- sigma_assembler_biwm(theta[1:2],theta[3],theta[4],c(0.5,0.5),distances)
+# test_matrix <- sigma_assembler_biwm(theta[1:2],theta[3],theta[4],c(0.5,0.5),distances,nug_vec = nug_vec)
 #
 #
 # block_inv(test_matrix)

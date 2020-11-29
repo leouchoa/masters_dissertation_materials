@@ -4,7 +4,7 @@
 \alias{LLike_biwm}
 \title{Log-likelihood of the Bivariate (Wittle-)Matern Model.}
 \usage{
-LLike_biwm(theta, nus, mu, coords_matrix, obs_matrix)
+LLike_biwm(theta, nus, mu, coords_matrix, obs_matrix, nug_vec)
 }
 \arguments{
 \item{theta}{A 4 x 1 numeric vector, the order of parameters is: theta = c(sigma_1^2, sigma_2^2, a, rho).}

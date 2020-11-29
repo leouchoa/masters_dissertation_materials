@@ -13,7 +13,8 @@ LLike_biwm <- function(theta,
                        nus,
                        mu,
                        coords_matrix,
-                       obs_matrix){
+                       obs_matrix,
+                       nug_vec){
 
   sigmas <- theta[1:2]
   as <- theta[3]
@@ -27,7 +28,8 @@ LLike_biwm <- function(theta,
                                          a = as,
                                          rho = rho,
                                          nus = nus,
-                                         coords_matrix = coords_matrix)
+                                         coords_matrix = coords_matrix,
+                                         nug_vec = nug_vec)
 
   autocov_matrix_inv <- block_inv(autocov_matrix)
 

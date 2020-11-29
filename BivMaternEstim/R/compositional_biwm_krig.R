@@ -21,20 +21,21 @@
 #' coords <- matrix(runif(2*n), ncol = 2)
 #' temp <- rnorm(2*n)
 #' nus_vec <- c(0.5, 0.5)
+#' nug_vec <- c(0,0)
 #' S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5,
-#' nus = nus_vec, coords_matrix = coords, combined = TRUE)
+#' nus = nus_vec, coords_matrix = coords, combined = TRUE,nug_vec = nug_vec)
 #' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #'
-#' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), nus_vec)
-#' biwm_fit <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), nus_vec)
+#' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), nus_vec,nug_vec = nug_vec)
+#' biwm_fit <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), nus_vec,nug_vec = nug_vec)
 #'
 #'x_grid <- seq(0,1,length.out = 10)
 #'krig_locations <- as.matrix(expand.grid(x_grid,x_grid))
 #'
-#'compositional_biwm_krig(biwm_fit,krig_locations,coords,log_cd,nus_vec)
+#'compositional_biwm_krig(biwm_fit,krig_locations,coords,log_cd,nus_vec,nug_vec)
 #'
 
-compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_matrix,nus){
+compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_matrix,nus,nug_vec,return_comp = TRUE){
 
   if(class(krig_locations) != "matrix" | class(fit_locations) != "matrix"){
     krig_locations <- as.matrix(krig_locations)
@@ -48,6 +49,7 @@ compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_ma
       ,rho = biwm_fit$theta[4],
       coords_matrix = fit_locations,
       nus = nus,
+      nug_vec = nug_vec,
       combined = TRUE
     )
 
@@ -60,6 +62,7 @@ compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_ma
       a = biwm_fit$theta[3],
       rho = biwm_fit$theta[4],
       nus = nus,
+      nug_vec = nug_vec,
       combined = TRUE
     )
 
@@ -94,10 +97,14 @@ compositional_biwm_krig <- function(biwm_fit,krig_locations,fit_locations,obs_ma
       c("process_01_pred","process_02_pred","coord_x","coord_y")
     )
 
-  return(
-    cbind(
-      alr_inv(z_prediction[,c("process_01_pred","process_02_pred")]),
-      z_prediction[,c("coord_x","coord_y")]
+  if(return_comp){
+    return(
+      cbind(
+        alr_inv(z_prediction[,c("process_01_pred","process_02_pred")]),
+        z_prediction[,c("coord_x","coord_y")]
       )
-  )
+    )
+  }else{
+    return(z_prediction)
+  }
 }

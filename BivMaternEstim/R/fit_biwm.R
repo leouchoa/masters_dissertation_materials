@@ -19,17 +19,20 @@
 #' n <- 40
 #' coords <- matrix(runif(2*n), ncol = 2)
 #' temp <- rnorm(2*n)
+#' nug_vec <- c(0,0)
 #' S <- sigma_assembler_biwm(sigmas = c(1, 1), a = 2, rho = 0.5,
-#' nus = c(0.5, 0.5), coords_matrix = coords, combined = TRUE)
+#' nus = c(0.5, 0.5), coords_matrix = coords, nug_vec = nug_vec, combined = TRUE)
 #' log_cd <- matrix(temp%*%chol(S) + rep(c(1,2), each = n), ncol = 2)
 #'
-#' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5))
-#' generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5))
+#' informed_test <- fit_biwm(log_cd, coords, c(1, 1, 2, .5), c(0.5, 0.5),nug_vec = nug_vec)
+#' generic_test <- fit_biwm(log_cd, coords, c(.5, .5, 4, .6), c(0.5, 0.5),nug_vec = nug_vec)
 #'
 fit_biwm <- function(obs_matrix,
                      coords_matrix,
                      theta0,
-                     nus, verbosity = 0, ...){
+                     nus,
+                     nug_vec,
+                     verbosity = 0, ...){
 
   if(length(nus) != 2){
     stop("Smoothness parameter vector must be of length 2", call. = FALSE)
@@ -57,8 +60,10 @@ fit_biwm <- function(obs_matrix,
                lower = c(0.001, 0.001, 0.001, -min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
                upper = c(Inf, Inf, Inf, min(sqrt(nus[1]*nus[2])/mean(nus), 0.999)),
                control = list(fnscale = -1, trace = verbosity),
-               nus = nus,  mu = mu, # We always use Z = vec(\mathbf{Y} - boldsymbol\mu), maybe center it outside function?
+               nus = nus,
+               mu = mu, # We always use Z = vec(\mathbf{Y} - boldsymbol\mu), maybe center it outside function?
                coords_matrix = coords_matrix,
+               nug_vec = nug_vec,
                obs_matrix = obs_matrix)
 
   # Update mu with generalized least squares, maybe update mle
