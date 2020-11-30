@@ -76,7 +76,7 @@ simulate_and_estimate_biwm <- function(n_points,
   }
 
   print(model)
-  plot(model)
+  # plot(model)
 
   biwm_sim <- RFsimulate(model, x, x)
   my_grid <- expand.grid(x,x)
@@ -227,7 +227,8 @@ simulate_and_estimate_biwm <- function(n_points,
     list(
       biwm_sim_df = biwm_sim_df,
       compositions_prediction = compositions_prediction,
-      loc_used = sampled_biwm_sim_df[,3:4]
+      loc_used = sampled_biwm_sim_df[,3:4],
+      biwm_fit = generic_test
     )
   )
 }

@@ -1,5 +1,4 @@
 library(BivMaternEstim)
-library(soiltexture)
 library(gstat)
 library(sp)
 library(ggplot2)
@@ -10,7 +9,7 @@ library(viridis)
 #krig_grid of leng 150 is good
 
 
-alr_transformed_with_locations_UNIQUE <- read.csv("../../data/alr_transformed_with_locations_UNIQUE.csv", row.names=NULL)
+alr_transformed_with_locations_UNIQUE <- read.csv("data/alr_transformed_with_locations_UNIQUE.csv", row.names=NULL)
 
 soil_dts <- alr_transformed_with_locations_UNIQUE[,1:4]
 
@@ -57,8 +56,8 @@ coords_range <- apply(coordinates(soil_dts),2,range)
 
 krig_grid <-
   expand.grid(
-    seq(coords_range[1,1] - 0.05,coords_range[2,1] + 0.09,length.out = 120),
-    seq(coords_range[1,2] - 0.05,coords_range[2,2] + 0.09,length.out = 120)
+    seq(coords_range[1,1] - 0.05,coords_range[2,1] + 0.09,length.out = 110),
+    seq(coords_range[1,2] - 0.05,coords_range[2,2] + 0.09,length.out = 110)
   )
 
 # krig_grid_full <- 
@@ -76,6 +75,7 @@ soil_dts_preds <- compositional_biwm_krig(
   nug_vec
   )
 
+names(soil_dts_preds) <- c("areia","argila","silte","coord_x","coord_y")
 
 # soil_dts_preds_full <- compositional_biwm_krig(
 #   biwm_fit = soil_dts_fit,
@@ -130,8 +130,6 @@ soil_dts_map_plot_v2 <- ggmap(ctb_map_image_unique_loc_constrained_v2) +
   geom_point(data = setNames(as.data.frame(soil_dts@coords),c("coord_x","coord_y")), 
              mapping = aes(x = coord_x,y = coord_y))
 
-
-names(soil_dts_preds) <- c("areia","argila","silte","coord_x","coord_y")
 
 pred_map_areia <- soil_dts_map_plot_v2 + 
   geom_tile(data = soil_dts_preds[,c(1,4,5)], 
@@ -210,12 +208,15 @@ pred_map_areia_with_size <- ggmap(ctb_map_image_unique_loc_constrained_v2) +
             aes(coord_x,coord_y, fill = areia, alpha = 0.01)
   ) + 
   scale_fill_viridis_c() +
-  guides(alpha = FALSE,size = FALSE) + 
+  # guides(alpha = FALSE,size = FALSE) + 
+  guides(alpha = FALSE) + 
   # guides(fill=guide_legend(title="Proporção \n de Areia")) +
   # guides(fill=guide_legend(title="")) +
   labs(
     x = "",
     y = "",
+    size = "Areia Observada",
+    fill = "Predição de Areia",
     title = "Predição Composicional de Areia"
   ) + 
   theme(axis.title.x=element_blank(),
@@ -234,14 +235,17 @@ pred_map_argila_with_size <- ggmap(ctb_map_image_unique_loc_constrained_v2) +
             aes(coord_x,coord_y, fill = argila, alpha = 0.01)
   ) + 
   scale_fill_viridis_c() +
-  guides(alpha = FALSE,size = FALSE) + 
+  # guides(alpha = FALSE,size = FALSE) + 
+  guides(alpha = FALSE) + 
   # guides(fill=guide_legend(title="Proporção \n de Areia")) +
   # guides(fill=guide_legend(title="")) +
   labs(
     x = "",
     y = "",
+    size = "Argila Observada",
+    fill = "Predição de Argila",
     title = "Predição Composicional de Argila"
-  ) + 
+  ) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
@@ -258,14 +262,17 @@ pred_map_silte_with_size <- ggmap(ctb_map_image_unique_loc_constrained_v2) +
             aes(coord_x,coord_y, fill = silte, alpha = 0.01)
   ) + 
   scale_fill_viridis_c() +
-  guides(alpha = FALSE,size = FALSE) + 
+  # guides(alpha = FALSE,size = FALSE) + 
+  guides(alpha = FALSE) + 
   # guides(fill=guide_legend(title="Proporção \n de Areia")) +
   # guides(fill=guide_legend(title="")) +
   labs(
     x = "",
     y = "",
+    size = "Silte Observada",
+    fill = "Predição de Silte",
     title = "Predição Composicional de Silte"
-  ) + 
+  ) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
@@ -383,47 +390,6 @@ comp_pred_nrow_3_no_axis_same_scale_with_size <- gridExtra::grid.arrange(pred_ma
 
 ggsave("comp_pred_nrow_3_no_axis_same_scale_with_size.pdf",plot = comp_pred_nrow_3_no_axis_same_scale_with_size,width = 8.27,height = 11.69)
 
-
-# --------- Prediction label map ----------
-
-soil_dts_preds_aux <- 
-  cbind(
-    setNames(soil_dts_preds[,1:3]*100,c("SAND","CLAY","SILT")),
-    soil_dts_preds[,4:5]
-    )
-
-class_labels <- as.data.frame(
-  TT.points.in.classes(soil_dts_preds_aux[,1:3],class.sys= "SiBCS13.TT")
-  )
-
-
-soil_dts_preds_v2 <- cbind(soil_dts_preds,label = as.factor(apply(class_labels,1,function(x){
-  aux_term <- colnames(class_labels)[which(as.logical(x))];
-  ifelse(length(aux_term) != 1,paste0(aux_term,collapse = "/"),aux_term)
-})))
-
-ggmap(ctb_map_image_unique_loc_constrained_v2) + 
-  # geom_point(data = setNames(as.data.frame(soil_dts@coords),c("coord_x","coord_y")),mapping = aes(x = coord_x,y = coord_y,size = alr_transformed_with_locations_UNIQUE$prop1_areia)) + 
-  geom_tile(data = soil_dts_preds_v2[,c("coord_x","coord_y","label")], 
-            mapping = aes(coord_x,coord_y, fill = label)
-  ) + 
-  scale_fill_viridis_d() +
-  guides(size = FALSE) + 
-  # guides(fill=guide_legend(title="Proporção \n de Areia")) +
-  # guides(fill=guide_legend(title="")) +
-  labs(
-    x = "",
-    y = "",
-    title = "Predição Composicional de Classificação de Solo",
-    fill = "Classi \n ficação"
-  ) + 
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()
-  )
 
 
 
@@ -591,12 +557,15 @@ areia_std_err_dm <- ggmap(ctb_map_image_unique_loc_constrained_v2) +
   # scale_fill_gradientn(colours=viridis(7),na.value = "transparent",
   #                      breaks=seq(0,1,length.out = 5),labels=seq(0,1,length.out = 5),
   #                      limits=c(0,1))+
-  guides(alpha = FALSE) + #, size = TRUE) + 
+  # guides(alpha = FALSE, 
+  #        size = FALSE) + 
+  guides(alpha = FALSE) + 
   labs(
     x = "",
     y = "",
-    title = "Predição Composicional de Areia",
-    size = "Areia"
+    title = "Desvio Padrão da Predição - Areia",
+    size = "Areia Observada",
+    fill = "Erro Padrão"
   ) + 
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -621,12 +590,15 @@ argila_std_err_dm <- ggmap(ctb_map_image_unique_loc_constrained_v2) +
   # scale_fill_gradientn(colours=viridis(7),na.value = "transparent",
   #                      breaks=seq(0,1,length.out = 5),labels=seq(0,1,length.out = 5),
   #                      limits=c(0,1))+
-  guides(alpha = FALSE) + #, size = TRUE) + 
+  # guides(alpha = FALSE, 
+  #        size = FALSE) + 
+  guides(alpha = FALSE) + 
   labs(
     x = "",
     y = "",
-    title = "Predição Composicional de Argila",
-    size = "Argila"
+    title = "Desvio Padrão da Predição - Argila",
+    size = "Argila Observada",
+    fill = "Erro Padrão"
   ) + 
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -651,12 +623,15 @@ silte_std_err_dm <- ggmap(ctb_map_image_unique_loc_constrained_v2) +
   # scale_fill_gradientn(colours=viridis(7),na.value = "transparent",
   #                      breaks=seq(0,1,length.out = 5),labels=seq(0,1,length.out = 5),
   #                      limits=c(0,1))+
-  guides(alpha = FALSE) + #, size = TRUE) + 
+  # guides(alpha = FALSE, 
+  #        size = FALSE) + 
+  guides(alpha = FALSE) + 
   labs(
     x = "",
     y = "",
-    title = "Predição Composicional de Silte",
-    size = "Silte"
+    title = "Desvio Padrão da Predição - Silte",
+    size = "Silte Observado",
+    fill = "Erro Padrão"
   ) + 
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
