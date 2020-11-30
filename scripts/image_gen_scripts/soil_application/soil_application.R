@@ -391,6 +391,49 @@ comp_pred_nrow_3_no_axis_same_scale_with_size <- gridExtra::grid.arrange(pred_ma
 ggsave("comp_pred_nrow_3_no_axis_same_scale_with_size.pdf",plot = comp_pred_nrow_3_no_axis_same_scale_with_size,width = 8.27,height = 11.69)
 
 
+# --------- Prediction label map ----------
+
+soil_dts_preds_aux <- 
+  cbind(
+    setNames(soil_dts_preds[,1:3]*100,c("SAND","CLAY","SILT")),
+    soil_dts_preds[,4:5]
+    )
+
+class_labels <- as.data.frame(
+  TT.points.in.classes(soil_dts_preds_aux[,1:3],class.sys= "SiBCS13.TT")
+  )
+
+
+soil_dts_preds_v2 <- cbind(soil_dts_preds,label = as.factor(apply(class_labels,1,function(x){
+  aux_term <- colnames(class_labels)[which(as.logical(x))];
+  ifelse(length(aux_term) != 1,paste0(aux_term,collapse = "/"),aux_term)
+})))
+
+ggmap(ctb_map_image_unique_loc_constrained_v2) + 
+  # geom_point(data = setNames(as.data.frame(soil_dts@coords),c("coord_x","coord_y")),mapping = aes(x = coord_x,y = coord_y,size = alr_transformed_with_locations_UNIQUE$prop1_areia)) + 
+  geom_tile(data = soil_dts_preds_v2[,c("coord_x","coord_y","label")], 
+            mapping = aes(coord_x,coord_y, fill = label)
+  ) + 
+  scale_fill_viridis_d() +
+  guides(size = FALSE) + 
+  # guides(fill=guide_legend(title="Proporção \n de Areia")) +
+  # guides(fill=guide_legend(title="")) +
+  labs(
+    x = "",
+    y = "",
+    title = "Predição Composicional de Classificação de Solo",
+    fill = "Classi \n ficação"
+  ) + 
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()
+  )
+
+
+
 
 
 # --------- Prediction Standard Error ----------
