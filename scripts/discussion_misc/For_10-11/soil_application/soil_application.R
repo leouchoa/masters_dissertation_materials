@@ -390,8 +390,9 @@ soil_dts_preds_aux <-
     soil_dts_preds[,4:5]
     )
 
-class_labels <- as.data.frame(TT.points.in.classes(soil_dts_preds_aux[,1:3],class.sys= "SiBCS13.TT"))
-
+class_labels <- as.data.frame(
+  TT.points.in.classes(soil_dts_preds_aux[,1:3],class.sys= "SiBCS13.TT")
+  )
 
 
 soil_dts_preds_v2 <- cbind(soil_dts_preds,label = as.factor(apply(class_labels,1,function(x){
