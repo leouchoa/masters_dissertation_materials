@@ -2,7 +2,7 @@ library(spdep)
 
 rnd_coords <- matrix(runif(2*10),ncol = 2)
 
-star_point <- rbind(c(0.25,0.25),c(0.5,0.5))
+star_point <- rbind(c(0.3,0.3),c(0.5,0.5))
 
 plot(rnd_coords)
 points(star_point,pch = 4)
