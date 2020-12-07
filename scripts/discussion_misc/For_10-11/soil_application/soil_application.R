@@ -683,14 +683,80 @@ NEW_obs_soil_dts_preds <- compositional_biwm_krig(
   krig_locations = NEW_alr_transformed_with_locations_UNIQUE[,6:7],
   fit_locations = coordinates(soil_dts),
   obs_matrix = soil_dts@data,
-  nus = nus_vec
+  nus = nus_vec,
+  nug_vec = nug_vec,
+  return_comp = FALSE
 )
 
+NEW_obs_soil_dts_preds_cmp <- compositional_biwm_krig(
+  biwm_fit = soil_dts_fit,
+  krig_locations = NEW_alr_transformed_with_locations_UNIQUE[,6:7],
+  fit_locations = coordinates(soil_dts),
+  obs_matrix = soil_dts@data,
+  nus = nus_vec,
+  nug_vec = nug_vec,
+  return_comp = TRUE
+)
+
+
+sigbar_hat_approx_NEW <- 
+  get_approx_alrInv_cond_covvar(
+    krig_values = NEW_obs_soil_dts_preds,
+    loc_new = NEW_alr_transformed_with_locations_UNIQUE[,c("coord_x","coord_x")],
+    loc_obs = soil_dts@coords,
+    biwm_fit = soil_dts_fit,
+    nus = nus_vec,
+    nug_vec = nug_vec
+    )
+
+
+NEW_obs_soil_dts_preds_cmp <- 
+  cbind(
+    setNames(NEW_obs_soil_dts_preds_cmp[,1:3]*100,c("SAND","CLAY","SILT")),
+    NEW_obs_soil_dts_preds_cmp[,4:5]
+  )
+
+class_labels_NEW <- as.data.frame(
+  TT.points.in.classes(NEW_obs_soil_dts_preds_cmp[,1:3],class.sys= "SiBCS13.TT")
+)
+
+
+soil_dts_preds_v2_NEW <- cbind(NEW_obs_soil_dts_preds_cmp,label = as.factor(apply(class_labels_NEW,1,function(x){
+  aux_term <- colnames(class_labels_NEW)[which(as.logical(x))];
+  ifelse(length(aux_term) != 1,paste0(aux_term,collapse = "/"),aux_term)
+})))
+
+
+new_obs_true_soil_label <- 
+
+as.data.frame(
+  TT.points.in.classes(
+    setNames(
+      NEW_alr_transformed_with_locations_UNIQUE[,1:3] * 100,
+      c("SAND","CLAY","SILT")
+    ),
+    class.sys= "SiBCS13.TT")
+)
+
+NEW_alr_transformed_with_locations_UNIQUE <- 
+  cbind(NEW_alr_transformed_with_locations_UNIQUE,label = as.factor(apply(new_obs_true_soil_label,1,function(x){
+  aux_term <- colnames(new_obs_true_soil_label)[which(as.logical(x))];
+  ifelse(length(aux_term) != 1,paste0(aux_term,collapse = "/"),aux_term)
+})))
+
+
+table(NEW_alr_transformed_with_locations_UNIQUE$label,soil_dts_preds_v2_NEW$label)
+
+
 # the error is large
-colSums(NEW_obs_soil_dts_preds[,1:3] - NEW_alr_transformed_with_locations_UNIQUE[,1:3])
+apply(
+  X = (NEW_obs_soil_dts_preds_cmp[,1:3]/100 - NEW_alr_transformed_with_locations_UNIQUE[,1:3])^2,
+  MARGIN = 2,
+  FUN = mean
+)
 
 apply(
-  X = NEW_obs_soil_dts_preds[,1:3] - NEW_alr_transformed_with_locations_UNIQUE[,1:3],
+  X = NEW_obs_soil_dts_preds_cmp[,1:3]/100 - NEW_alr_transformed_with_locations_UNIQUE[,1:3],
   MARGIN = 2,
   FUN = hist
   )
