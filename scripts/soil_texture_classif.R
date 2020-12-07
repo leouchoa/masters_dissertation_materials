@@ -18,3 +18,5 @@ apply(class_label,1,function(x){
 })
 
 class_label$classif <- aux_res
+
+TT.plot( class.sys = "SiBCS13.TT" , lang = "pt")
