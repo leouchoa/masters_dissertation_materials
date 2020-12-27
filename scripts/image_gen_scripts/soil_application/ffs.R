@@ -150,3 +150,40 @@ lapply(
   }
 )
 
+# ---- exporting to Latex  -----
+
+
+train_set_acc <- 
+  data.frame(
+    K = seq_along(knn_train_conf_mat),
+    "Acurácia" = unlist(
+      lapply(knn_train_conf_mat,function(x){
+        100 * round(
+          sum(diag(x))/nrow(ctb0562),
+          3
+        )
+      })
+    )
+  )
+
+xtable::xtable(train_set_acc)
+
+
+xtable::xtable(test_set_acc)
+
+
+lapply(
+  test_prob,
+  function(x){
+    # as.character(x)
+    # attr(x,"prob")
+    xtable::xtable(
+      data.frame(
+        "Observado" = ctb0809$label,
+        "Predito" = as.character(x),
+        "Probabilidade" = attr(x,"prob")
+      )
+    )
+  }
+)
+
