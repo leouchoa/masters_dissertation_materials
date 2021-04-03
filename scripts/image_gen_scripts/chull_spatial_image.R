@@ -27,3 +27,31 @@ ggplot(chull_df,aes(V1,V2)) +
     shape = "X", 
     size = 6
   )
+
+
+# ------ KNN adaptation -----
+
+
+aux_df$categ <- sample(1:2,4,replace = TRUE)
+
+ggplot(chull_df,aes(V1,V2)) + 
+  geom_polygon(
+    alpha = 0.3
+  ) + 
+  theme_void() + 
+  geom_point(
+    data = aux_df[1:3,],
+    aes(V1,V2,color = factor(categ)), 
+    size = 4
+  ) +
+  geom_point(
+    data = aux_df[4,],
+    aes(V1,V2),
+    shape = "X", 
+    size = 6
+  ) + 
+  labs(
+    color = ""
+  ) + 
+  scale_color_manual(values = c("1" = "black", "2" = "blue"))
+

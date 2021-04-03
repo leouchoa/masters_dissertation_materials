@@ -25,6 +25,7 @@ theta_hat_hist <- function(true_param,
                            initial_guess,
                            n_points = 80,
                            nus_vec = c(0.5,0.5),
+                           nug_vec = c(0,0),
                            n_replicates = 30,
                            seed_number = sample.int(12312312,1)
                            ){

@@ -9,6 +9,7 @@ library(soiltexture)
 
 #krig_grid of leng 150 is good
 
+KRIG_GRID_LEN <- 110
 
 alr_transformed_with_locations_UNIQUE <- read.csv("data/alr_transformed_with_locations_UNIQUE.csv", row.names=NULL)
 
@@ -57,8 +58,8 @@ coords_range <- apply(coordinates(soil_dts),2,range)
 
 krig_grid <-
   expand.grid(
-    seq(coords_range[1,1] - 0.05,coords_range[2,1] + 0.09,length.out = 110),
-    seq(coords_range[1,2] - 0.05,coords_range[2,2] + 0.09,length.out = 110)
+    seq(coords_range[1,1] - 0.05,coords_range[2,1] + 0.09,length.out = KRIG_GRID_LEN),
+    seq(coords_range[1,2] - 0.05,coords_range[2,2] + 0.09,length.out = KRIG_GRID_LEN)
   )
 
 # krig_grid_full <- 
@@ -719,3 +720,38 @@ apply(
   MARGIN = 2,
   FUN = hist
   )
+
+
+# ------------ geom_map + objective ------------- #
+
+# alr_transformed_with_locations_UNIQUE %>%
+# filter(coord_y > -19,coord_x < -47.8)
+
+ggmap(ctb_map_image_unique_loc_constrained_v2) + 
+  geom_point(data = setNames(
+    as.data.frame(soil_dts@coords),
+    c("coord_x","coord_y")
+    ), 
+    mapping = aes(x = coord_x,y = coord_y,size=1)) + 
+  guides(size=FALSE) + 
+  annotate("text", 
+           label = "(areia=34%,argila=32%,silte=34%)", 
+           x = -48.3, 
+           y = -18.0, 
+           size = 7, 
+           colour = "black") + 
+  geom_segment(
+    aes(x = -48.5, y = -18.1, xend = -47.95, yend = -18.6),
+    arrow = arrow(length = unit(0.5, "cm"))
+  ) + 
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()
+        )
+  # geom_curve(
+  #   aes(x = -48, y = -18, xend = -47.95, yend = -18.6),
+  #   arrow = arrow(length = unit(0.03, "cm"))
+  # )
