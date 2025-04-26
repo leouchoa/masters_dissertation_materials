@@ -1,0 +1,67 @@
+\documentclass{article}
+\title{Dicas para escrita de Monografia}
+% \author{}
+\date{}
+\begin{document}
+\maketitle
+\section{Introdução} \label{sec:intro}
+
+Sabe-se por experiência dos autores deste documento que a escrita científica é um tema ainda muito pouco ensinado em várias instituições brasileiras, o que causa desnecessária dificuldade no processo de escrita de uma monografia. Este texto é uma coletânea que reune algumas dicas para facilitar o processo de composição de uma monografia científica, de forma a seguir as regras ABNT\footnote{Com alguma liberdade criativa.}. 
+
+A seção ``Dicas de Escrita'' remete à dicas de melhor transmitir ideias ao texto e remete à tópicos como clareza, explicação e fluidez. Já seção ``Dicas de Formatação'' aborda dicas para seguir as normas ABNT para garantir maior uniformização do conteúdo do texto. Por fim a seção ``Dicas Sobre o \LaTeX'' reune sugestões de comandos para melhor formatar um documento que segue a linha \LaTeX.
+
+\pagebreak
+
+\section{Dicas de Escrita} \label{sec:dicas_escrita}
+
+\begin{itemize}
+  \item Evite palavras de valoração, como ``muito'', ``importante'', ``crítico'', ``essencial'' etc. assim como valoração do trabalho de terceiros. Escrita científica é monótona e impessoal
+  \item Prefira título explicativos e objetivos, mesmo que mais longos e específicos. Exemplo:
+    \subitem Antes: Estudo de Otimização da Função de Covariância
+    \subitem Depois:  Dificuldades de Otimização da Verossimilhança em Função da Covariância
+  \item Não há problema em ser repetitivo desde que ocorra ganho em clareza
+  \item Cuidado para não assumir que o leitor está habituado com a figura apresentada. Caso seja a primeira que você apresente a figura, descreva-a. Em seguida, interprete-a se for necessário.
+  \item As equação fazem parte do texto. Trate-as como tal e adicione pontuação. 
+    \subitem Exemplo: uso da vírgula após a equação para dar fluidez ao texto
+    \subitem [\dots] e desta forma a equação $$a = b,$$ por sua vez, serve para descrever o funcionamento [\dots]
+\end{itemize}
+
+\pagebreak
+
+\section{Dicas de Formatação} \label{sec:dicas_formatacao}
+
+\begin{itemize}
+  \item Toda tabela e figura deve ser referênciada no texto
+  \item Tabelas e figuras devem ser escritas com iniciais maiúsculas
+  \item Para tabelas, a legenda deve aparecer acima da tabela. Já para figuras, a legenda deve aparecer abaixo da figura.
+  \item Numerar somente as equações mencionadas no texto
+  \item ``Seção'' deve ser escrita com inicial maiúscula
+  \item Palavras em Ingês são escritas em itálico
+  \item Evite usar muitas casas decimais. Normalmente quatro casas são o suficiente.
+  \item Sempre que possível, deixe as figuras com as mesmas dimensões.
+  \item Se a citação for referente à um livro, então deve-se acrescentar a página da qual a referência foi extraída.
+  \item Se o nome de uma técnica remeter ao nome do criador, pode-se escrevê-la com inicial maiúscula. 
+    \subitem Exemplo: \textit{kriging} é o nome de uma técnica estatística criada por Danie Gerhardus Krige e, neste caso, pode ser escrita no texto como \textit{Kriging}.
+\end{itemize}
+
+\pagebreak
+
+\section{Dicas Sobre o \LaTeX} \label{sec:latex}
+
+\begin{itemize}
+  \item Dê preferência a utilizar o formato modular para criação de documentos. Ele para segregar o texto em subpartes de forma a quebrar o arquivo em elementos mais administráveis e autocontidos.
+  \item Em figuras e tabelas o comando \texttt{\textbackslash caption} tem que vir antes do comando \texttt{\textbackslash label}
+  \item Ao referenciar equações, utilize o comando \texttt{\textbackslash eqref}
+  \item Quando quiser usar aspas em uma palavra, utilize: dois acentuos de crase + palavra + duas aspas simples. 
+    \subitem Exemplo: "palavra" torna-se ``palavra''.
+  \item O comando \texttt{vspace} é muito útil para ajustar espacamento entre uma figura e sua legenda, pois adiciona ou remove espaço entre blocos.
+  \item Utilize o comando \texttt{\textbackslash citeonline} para citações que interajam com a escrita. Caso seja uma referência vazia (que não esteja alinhada com o texto), pode utilizar o comando \texttt{\textbackslash cite} 
+  \item Se for abreviações matemáticas como ``log'' ou ``det'' no \textit{mathmode}, prefira usar comandos como \texttt{\textbackslash log} e \texttt{\textbackslash det} para uma melhor formatação.
+\end{itemize}
+
+% \section{Introdução} \label{sec:intro}
+
+
+
+
+\end{document}
