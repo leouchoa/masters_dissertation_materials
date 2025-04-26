@@ -1,0 +1,5 @@
+Eu acho que estimar conjuntamente 'a' e 'rho' ao mesmo tempo é que é um problema. O motivo é que o gráfico de contorno deles me sugere que as flechas parecem mais perdidas do que nos outros casos. 
+
+Além disso parece que sigma2_1 vs sigma2_2 tá complicado também, tem algumas flechas muito longas. Interessante é investigar o motivo de eles estarem assim.
+
+Na verdade o problema parece ser com a escala do rho mesmo. Depois de fazer o gráfico "LLike_contours_without_fisher_another_scales_gamma_plot_both_rhos" que usa o gamma_plot 0.0005 para os dois casos em que rho está presente, dá pra notar que o efeito da escala dele é que parece ser o grande problema

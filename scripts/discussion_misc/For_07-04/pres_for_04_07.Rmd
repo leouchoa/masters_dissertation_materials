@@ -1,0 +1,173 @@
+---
+title: "Idéias"
+author: ""
+date: ""
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Abordagens
+
+>- Encontrar matrix de fisher
+>   - Matriz Esperada não dá
+<!-- >   - Matriz Observada talvez dê e tenhamos vantagens [1] -->
+
+>- Encontrar hessiana ou Matriz Observada
+>   - Parece possível sem o efeito do nugget. Com nugget acho que não
+>   - Vantagens pra densidade normal [1] (não li tá kkkk)
+
+>- Faz como o artigo sugere
+
+# Matriz de Fisher
+
+## Matriz de Fisher
+
+>- Para $\boldsymbol{\theta} = (\sigma^2_1,\sigma^2_2,a,\rho)$, temos que \begin{equation} \log(\boldsymbol{\theta}) = - \frac{1}{2} \big[ \log(\det(\boldsymbol{\Sigma_{\boldsymbol{\theta}}})) + ( \textbf{z} - \boldsymbol{\mu})^{T}\boldsymbol{\Sigma_{\boldsymbol{\theta}}}^{-1}(\textbf{z} - \boldsymbol{\mu}) + 2N\log(2\pi) \big]. \end{equation}
+
+>- Então a informação $\mathcal{I}(\boldsymbol{\theta})$ é \begin{equation}\mathcal{I}_{ij}(\boldsymbol{\theta}) = \frac{\partial \log(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \frac{\partial \log(\boldsymbol{\theta})}{\partial \boldsymbol{\theta}}^{T}\end{equation}
+
+## Matriz de Fisher
+
+>- Se $\dot{l}_k(\boldsymbol{\theta}) =\frac{\partial \log(\boldsymbol{\theta})}{\partial \theta_k}$ então
+
+>- \begin{equation}\mathcal{I}_{ij}(\boldsymbol{\theta}) =
+\begin{pmatrix}\dot{l}^{2}_1(\boldsymbol{\theta}) & \cdots &\dot{l}_1(\boldsymbol{\theta})\dot{l}_4(\boldsymbol{\theta}) \\
+\vdots & \ddots & \vdots \\ \dot{l}_4(\boldsymbol{\theta}) \dot{l}_1(\boldsymbol{\theta}) & \cdots &\dot{l}^{2}_4(\boldsymbol{\theta})\end{pmatrix}\end{equation}
+
+## Matriz de Fisher na entrada $i=1,j=2$
+
+q
+## Matriz de Fisher na entrada $i=1,j=2$
+
+>- Sem condições de encontrar a esperança disso, até tentei
+>- Problema são as inversas $\boldsymbol{\Sigma}^{-1}$
+
+# Hessiana
+
+## Idéia
+
+>- Sem o efeito do nugget é possível isolar os parâmetros $\sigma^2$ e $a$, mas não rho.
+>- Com o nugget a coisa só piora.
+
+
+## Exemplo para $\sigma^2_1$
+
+Queremos calcular
+
+\begin{equation}
+\begin{aligned}
+&\frac{\partial}{\partial \sigma^2_1} 
+\Bigg\{
+tr\Bigg( 
+C_{11}^{*}( \textbf{h} )M(\textbf{h} | \nu_1,a)
+\Bigg) +
+2 tr\Bigg( 
+ C_{12}^{*}( \textbf{h} )\frac{\rho \sigma_2}{2 \sigma_1} M(\textbf{h} | \nu_3,a)
+\Bigg) \\
+&+
+\frac{1}{\sigma^2_1} y_1^{T} \Bigg[
+C_{11}( \textbf{h} | \nu_1,a)y_1 + C_{12}( \textbf{h}| \nu_3,a)y_2
+\Bigg]
+\Bigg\}
+\end{aligned}
+\end{equation}
+
+
+## Problema
+
+>- Extrair os parâmetro $\sigma^2_1$ da inversa $\boldsymbol{\Sigma^{-1}}$. Ou seja:
+
+>- Extrair parâmetros de $C^{\star}_{ii}$ e $C^{\star}_{ij}$
+
+## Exemplo para $\sigma^2_1$
+
+\begin{equation}
+\begin{aligned}
+&C^{\star}_{11} = 
+\Bigg[
+C_{11} - C_{12}C^{-1}_{22}C_{11}
+\Bigg]^{-1} 
+= \\
+&\Bigg[
+\sigma^2_1 M(\textbf{h}|a,\nu_1) - \frac{\rho \sigma^2_1 \sigma^2_2}{\sigma^2_2}M(\textbf{h}|a,\nu_3)M^{-1}(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
+\Bigg]^{-1} 
+= \\
+&\frac{1}{\sigma^2_1}
+\Bigg[
+M(\textbf{h}|a,\nu_1) - \rho M(\textbf{h}|a,\nu_3)M^{-1}(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
+\Bigg]^{-1}
+\end{aligned}
+\end{equation}
+
+## Exemplo para $\sigma^2_1$
+
+Agora
+
+\begin{equation}
+\begin{aligned}
+&C^{\star}_{12} = -C^{-1}_{22}C_{11}C^{\star}_{11} \\
+&=
+-\frac{\rho}{\sigma^2_1}C_{22}M(\textbf{h}|a,\nu_3)
+tr\Bigg[
+M(\textbf{h}|a,\nu_1) - \rho M(\textbf{h}|a,\nu_3)M^{-1}(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
+\Bigg]^{-1}
+\end{aligned}
+\end{equation}
+
+
+## Exemplo para $\sigma^2_1$
+
+\begin{equation}
+\begin{aligned}
+\frac{\partial}{\partial \sigma^2_1} tr\Bigg( &C^{\star}_{11} M(\textbf{h}|a,\nu_1) \Bigg) \\
+&= 
+-\frac{1}{\sigma^4_1}
+tr\Bigg[
+M(\textbf{h}|a,\nu_1) - \rho M(\textbf{h}|a,\nu_3)M(\textbf{h}|a,\nu_2)M(\textbf{h}|a,\nu_3)
+\Bigg]^{-1}
+\end{aligned}
+\end{equation}
+
+## Exemplo para $\sigma^2_1$
+
+Por outro lado 
+
+\begin{equation}
+\begin{aligned}
+&\frac{\partial}{\partial \sigma^2_1}
+\frac{1}{\sigma^2_1} 
+y^{T}_1\Bigg[
+C_{11}( \textbf{h} | \nu_1,a)y_1 + C_{12}( \textbf{h}| \nu_3,a)y_2
+\Bigg] \\
+&=
+\frac{\partial}{\partial \sigma^2_1}
+\frac{1}{\sigma^2_1} 
+y^{T}_1\Bigg[
+\sigma^2_1M( \textbf{h} | \nu_1,a)y_1 + \rho \sigma_1 \sigma_2M( \textbf{h}| \nu_3,a)y_2
+\Bigg] \\
+&=
+\frac{\partial}{\partial \sigma^2_1}
+y^{T}_1\Bigg[\frac{\rho \sigma_2}{\sigma_1} M( \textbf{h}| \nu_3,a)y_2\Bigg] \\
+&=
+\frac{\rho \sigma_2}{2 \sigma^{2/3}_1}
+y^{T}_1\Bigg[ M( \textbf{h}| \nu_3,a)y_2\Bigg]
+\end{aligned}
+\end{equation}
+
+## Exemplo para $\sigma^2_1$
+
+>- A conta parece correta
+>- Se eu não tivesse esquecido que $\textbf{y}= \boldsymbol\Sigma^{-1}_{\boldsymbol\theta}\textbf{z}$
+>- ....
+
+## Conclusão
+
+>- Acho prudente tentar estimar o nugget e usar a abordagem do artigo
+
+## Refs
+
+
+[1]. Assessing the accuracy of the maximum likelihood estimator: Observed versus expected Fisher Information
